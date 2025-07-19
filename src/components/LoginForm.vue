@@ -83,12 +83,18 @@ const handleLogin = async () => {
       body: JSON.stringify({ email: email.value, password: password.value })
     })
     const data = await res.json()
-
+    console.log('登入回傳資料：', data)
     if (!res.ok) throw new Error(data.message || '登入失敗')
 
     // 儲存登入狀態 (範例：localStorage + Pinia 可擴充)
     localStorage.setItem('token', data.token)
-    router.push('/member/profile')
+    localStorage.setItem('manager', data.manager) // 👈 加上這行，才能跳往/manager
+    //加入跳轉管理者頁面
+    if (data.manager === true) {
+      router.push('/manager') 
+    } else {
+      router.push('/member/profile')
+    }
 
   } catch (err) {
     errorMessage.value = err.message
