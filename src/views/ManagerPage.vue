@@ -1,4 +1,18 @@
 <template>
+   <header class="header_area">
+      <div class="main_menu">
+        <nav class="navbar navbar-expand-lg navbar-light">
+          <div class="container">
+            <a class="navbar-brand logo_h"><router-link to="/"><img src="/aroma/img/logo.png" alt=""></router-link></a>
+            <div class="collapse navbar-collapse offset" id="navbarSupportedContent">
+              <ul class="nav navbar-nav menu_nav ml-auto mr-auto">
+                <h4 class="container mt-2">登入</h4>
+              </ul>
+            </div>
+          </div>
+        </nav>
+      </div>
+    </header>
   <div class="admin-container">
     <h2>後台管理系統</h2>
     <ul class="nav nav-tabs">
@@ -9,6 +23,13 @@
 
     <component :is="currentTabComponent" />
   </div>
+  <footer class="footer mt-5">
+      <div class="footer-area">
+        <div class="container">
+          <p class="text-center pt-5">© 2025 Aroma Shop. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
 </template>
 
 <script setup>
