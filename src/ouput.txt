@@ -1,0 +1,39 @@
+
+D:.
+|   App.vue
+|   main.js
+|   ouput.txt
+|   
++---assets
+|       logo.png
+|       
++---components
+|       AdminForm.vue
+|       HelloWorld.vue
+|       LoginForm.vue
+|       MemberOrdersTable.vue
+|       MemberTable.vue
+|       OrderTable.vue
+|       ProductForm.vue
+|       RegisterForm.vue
+|       ResetPasswordForm.vue
+|       
++---router
+|       index.js
+|       
++---stores
+|       auth.js
+|       cart.js
+|       
+\---views
+        AboutView.vue
+        Cart.vue
+        Checkout.vue
+        Home.vue
+        HomeView.vue
+        LoginPage.vue
+        ManagerPage.vue
+        ProfilePage.vue
+        RegisterPage.vue
+        ResetPasswordPage.vue
+        
