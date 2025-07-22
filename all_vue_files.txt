@@ -1,0 +1,1323 @@
+================================================================================
+// File: D:\node_practice\vue-project\aroma-shop_0719\src\App.vue
+================================================================================
+<template>
+  <router-view />
+</template>
+
+
+================================================================================
+// File: D:\node_practice\vue-project\aroma-shop_0719\src\components\AdminForm.vue
+================================================================================
+<template>
+  <div>
+    <h4>新增管理員</h4>
+    <img src="aroma/img/login.jpg" alt="admin" class="img-thumbnail mb-2" style="width: 150px;">
+    <form @submit.prevent="addAdmin">
+      <div class="form-group">
+        <label>帳號</label>
+        <input v-model="newAdmin.username" type="text" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>密碼</label>
+        <input v-model="newAdmin.password" type="password" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>權限</label>
+        <select v-model="newAdmin.role" class="form-control">
+          <option>一般管理員</option>
+          <option>超級管理員</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-success">新增</button>
+    </form>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+
+const newAdmin = ref({ username: '', password: '', role: '一般管理員' })
+
+function addAdmin() {
+  alert(`新增管理員：${newAdmin.value.username}`)
+}
+</script>
+
+================================================================================
+// File: D:\node_practice\vue-project\aroma-shop_0719\src\components\HelloWorld.vue
+================================================================================
+<template>
+  <div class="hello">
+    <h1>{{ msg }}</h1>
+    <p>
+      For a guide and recipes on how to configure / customize this project,<br>
+      check out the
+      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
+    </p>
+    <h3>Installed CLI Plugins</h3>
+    <ul>
+      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
+      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-router" target="_blank" rel="noopener">router</a></li>
+    </ul>
+    <h3>Essential Links</h3>
+    <ul>
+      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
+      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
+      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
+      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
+      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
+    </ul>
+    <h3>Ecosystem</h3>
+    <ul>
+      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
+      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
+      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
+      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
+      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
+    </ul>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'HelloWorld',
+  props: {
+    msg: String
+  }
+}
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped>
+h3 {
+  margin: 40px 0 0;
+}
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+li {
+  display: inline-block;
+  margin: 0 10px;
+}
+a {
+  color: #42b983;
+}
+</style>
+
+
+================================================================================
+// File: D:\node_practice\vue-project\aroma-shop_0719\src\components\LoginForm.vue
+================================================================================
+<template>
+  <form @submit.prevent="handleLogin" class="w-full max-w-sm mx-auto bg-white p-6 rounded-xl shadow space-y-4">
+
+    <header class="header_area">
+      <div class="main_menu">
+        <nav class="navbar navbar-expand-lg navbar-light">
+          <div class="container">
+            <a class="navbar-brand logo_h"><router-link to="/"><img src="/aroma/img/logo.png" alt=""></router-link></a>
+            <div class="collapse navbar-collapse offset" id="navbarSupportedContent">
+              <ul class="nav navbar-nav menu_nav ml-auto mr-auto">
+                <h4 class="container mt-2">登入</h4>
+              </ul>
+            </div>
+          </div>
+        </nav>
+      </div>
+    </header>
+    
+
+    <div>
+      <label class="block text-sm font-medium">電子郵件</label>
+      <input
+        type="email"
+        v-model="email"
+        class="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+        required
+      />
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">密碼</label>
+      <input
+        type="password"
+        v-model="password"
+        class="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+        required
+      />
+    </div>
+
+    <div v-if="errorMessage" class="text-red-500 text-sm">{{ errorMessage }}</div>
+
+    <button type="submit" class="nav-item">登入</button>
+
+    <p class="text-sm text-gray-500"><router-link to="/member/reset-password">忘記密碼？</router-link></p>
+
+    <p class="text-center text-sm text-gray-500">
+      還沒有帳號？
+      <router-link to="/register" class="text-blue-500 hover:underline">前往註冊</router-link>
+    </p>
+    <p class="text-center text-sm text-gray-500">
+      <router-link to="/" class="text-blue-500 hover:underline">回首頁</router-link>
+    </p>
+    
+    <footer class="footer mt-5">
+      <div class="footer-area">
+        <div class="container">
+          <p class="text-center pt-5">© 2025 Aroma Shop. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+  </form>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const email = ref('')
+const password = ref('')
+const errorMessage = ref('')
+const router = useRouter()
+
+const handleLogin = async () => {
+  if (!email.value || !password.value) {
+    errorMessage.value = '請填寫所有欄位'
+    return
+  }
+
+  try {
+    const res = await fetch('http://localhost:3000/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.value, password: password.value })
+    })
+    const data = await res.json()
+    console.log('登入回傳資料：', data)
+    if (!res.ok) throw new Error(data.message || '登入失敗')
+
+    // 儲存登入狀態 (範例：localStorage + Pinia 可擴充)
+    localStorage.setItem('token', data.token)
+    localStorage.setItem('manager', data.manager) // 👈 加上這行，才能跳往/manager
+    //加入跳轉管理者頁面
+    if (data.manager === true) {
+      router.push('/manager') 
+    } else {
+      router.push('/member/profile')
+    }
+
+  } catch (err) {
+    errorMessage.value = err.message
+  }
+}
+</script>
+
+
+
+================================================================================
+// File: D:\node_practice\vue-project\aroma-shop_0719\src\components\MemberOrdersTable.vue
+================================================================================
+<template>
+  <div>
+    <h4>會員資料與訂單</h4>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>會員ID</th>
+          <th>姓名</th>
+          <th>Email</th>
+          <th>註冊時間</th>
+          <th>頭像</th>
+          <th>訂單</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="user in users" :key="user.id">
+          <td>{{ user.id }}</td>
+          <td>{{ user.name }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ user.registered }}</td>
+          <td><img src="aroma/img/r1.jpg" alt="avatar" style="height: 50px;"></td>
+          <td>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>訂單編號</th>
+                  <th>金額</th>
+                  <th>狀態</th>
+                  <th>圖片</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="order in user.orders" :key="order.id">
+                  <td>{{ order.id }}</td>
+                  <td>{{ order.amount }}</td>
+                  <td>{{ order.status }}</td>
+                  <td><img src="aroma/img/r3.jpg" alt="product" style="height: 50px;"></td>
+                </tr>
+                <tr v-if="user.orders.length === 0">
+                  <td colspan="4">無訂單</td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+
+const users = ref([
+  {
+    id: 1,
+    name: '王小明',
+    email: 'ming@example.com',
+    registered: '2025-07-01',
+    orders: [
+      { id: '#1001', amount: '$500', status: '已出貨' },
+      { id: '#1002', amount: '$300', status: '處理中' }
+    ]
+  },
+  {
+    id: 2,
+    name: '林小美',
+    email: 'mei@example.com',
+    registered: '2025-07-05',
+    orders: []
+  }
+])
+</script>
+
+
+================================================================================
+// File: D:\node_practice\vue-project\aroma-shop_0719\src\components\MemberTable.vue
+================================================================================
+<template>
+  <div>
+    <h4>會員資料</h4>
+    <table class="table table-bordered">
+      <thead>
+        <tr><th>ID</th><th>姓名</th><th>Email</th><th>註冊時間</th><th>頭像</th></tr>
+      </thead>
+      <tbody>
+        <tr v-for="user in users" :key="user.id">
+          <td>{{ user.id }}</td>
+          <td>{{ user.name }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ user.registered }}</td>
+          <td><img src="aroma/img/r1.jpg" alt="avatar" style="height: 50px;"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+
+const users = ref([
+  { id: 1, name: '王小明', email: 'ming@example.com', registered: '2025-07-01' }
+])
+</script>
+
+================================================================================
+// File: D:\node_practice\vue-project\aroma-shop_0719\src\components\OrderTable.vue
+================================================================================
+<template>
+  <div>
+    <h4>所有訂單</h4>
+    <table class="table table-bordered">
+      <thead>
+        <tr><th>訂單編號</th><th>會員</th><th>金額</th><th>狀態</th><th>圖片</th></tr>
+      </thead>
+      <tbody>
+        <tr v-for="order in orders" :key="order.id">
+          <td>{{ order.id }}</td>
+          <td>{{ order.user }}</td>
+          <td>{{ order.amount }}</td>
+          <td>{{ order.status }}</td>
+          <td><img src="aroma/img/r3.jpg" alt="product" style="height: 50px;"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+
+const orders = ref([
+  { id: '#1001', user: '王小明', amount: '$500', status: '已出貨' }
+])
+</script>
+
+================================================================================
+// File: D:\node_practice\vue-project\aroma-shop_0719\src\components\ProductForm.vue
+================================================================================
+<template>
+  <div>
+    <h4>商品上架</h4>
+    <img src="aroma/img/r2.jpg" alt="preview" class="img-thumbnail mb-2" style="width: 150px;">
+    <form @submit.prevent="addProduct">
+      <div class="form-group">
+        <label>商品名稱</label>
+        <input v-model="newProduct.name" type="text" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>分類</label>
+        <input v-model="newProduct.category" type="text" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>價格</label>
+        <input v-model="newProduct.price" type="number" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>上傳圖片</label>
+        <input type="file" class="form-control-file">
+      </div>
+      <button type="submit" class="btn btn-primary">送出</button>
+    </form>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+
+const newProduct = ref({ name: '', category: '', price: 0 })
+
+function addProduct() {
+  alert(`已上架商品：${newProduct.value.name}`)
+}
+</script>
+
+================================================================================
+// File: D:\node_practice\vue-project\aroma-shop_0719\src\components\ProductInventory.vue
+================================================================================
+<template>
+  <div>
+    <h4>商品庫存查詢</h4>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>商品編號</th>
+          <th>名稱</th>
+          <th>分類</th>
+          <th>庫存</th>
+          <th>價格</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="product in products" :key="product.id">
+          <td>{{ product.id }}</td>
+          <td>{{ product.name }}</td>
+          <td>{{ product.category }}</td>
+          <td>{{ product.stock }}</td>
+          <td>{{ product.price }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+
+const products = ref([
+  { id: 'P1001', name: 'iPhone 15', category: '手機', stock: 12, price: 34900 },
+  { id: 'P1002', name: 'MacBook Pro', category: '筆電', stock: 7, price: 59900 }
+])
+</script>
+
+
+================================================================================
+// File: D:\node_practice\vue-project\aroma-shop_0719\src\components\RegisterForm.vue
+================================================================================
+<template>
+  <form @submit.prevent="handleRegister" class="w-full max-w-md mx-auto bg-white p-6 rounded-xl shadow space-y-4">
+    <header class="header_area">
+      <div class="main_menu">
+        <nav class="navbar navbar-expand-lg navbar-light">
+          <div class="container">
+            <a class="navbar-brand logo_h"><router-link to="/"><img src="/aroma/img/logo.png" alt=""></router-link></a>
+            <div class="collapse navbar-collapse offset" id="navbarSupportedContent">
+              <ul class="nav navbar-nav menu_nav ml-auto mr-auto">
+                <h4 class="container mt-2">註冊</h4>
+              </ul>
+            </div>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <div>
+      <label class="block text-sm font-medium">姓名</label>
+      <input
+        v-model="name"
+        type="text"
+        class="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+        required
+      />
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">電子郵件</label>
+      <input
+        v-model="email"
+        type="email"
+        class="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+        required
+      />
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">密碼</label>
+      <input
+        v-model="password"
+        type="password"
+        class="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+        required
+      />
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">確認密碼</label>
+      <input
+        v-model="confirmPassword"
+        type="password"
+        class="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+        required
+      />
+    </div>
+
+    <div v-if="errorMessage" class="text-red-500 text-sm">{{ errorMessage }}</div>
+
+    <button
+      type="submit"
+      class="nav-item"
+    >
+      註冊
+    </button>
+
+    <p class="text-center text-sm text-gray-500">
+      已有帳號？
+      <router-link to="/login" class="text-blue-500 hover:underline">前往登入</router-link>
+    </p>
+    <p class="text-center text-sm text-gray-500">
+      <router-link to="/" class="text-blue-500 hover:underline">回首頁</router-link>
+    </p>
+
+    <footer class="footer mt-5">
+      <div class="footer-area">
+        <div class="container">
+          <p class="text-center pt-5">© 2025 Aroma Shop. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+
+  </form>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const name = ref('')
+const email = ref('')
+const password = ref('')
+const confirmPassword = ref('')
+const errorMessage = ref('')
+const router = useRouter()
+
+const handleRegister = async () => {
+  if (!name.value || !email.value || !password.value || !confirmPassword.value) {
+    errorMessage.value = '請填寫所有欄位'
+    return
+  }
+
+  if (password.value !== confirmPassword.value) {
+    errorMessage.value = '密碼與確認密碼不相符'
+    return
+  }
+
+  try {
+    const res = await fetch('http://localhost:3000/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: name.value,
+        email: email.value,
+        password: password.value
+      })
+    })
+    const data = await res.json()
+
+    if (!res.ok) throw new Error(data.message || '註冊失敗')
+
+    // 註冊成功後導向登入
+    router.push('/login')
+  } catch (err) {
+    errorMessage.value = err.message
+  }
+}
+</script>
+
+
+================================================================================
+// File: D:\node_practice\vue-project\aroma-shop_0719\src\components\ResetPasswordForm.vue
+================================================================================
+<template>
+  <form @submit.prevent="handleSubmit" class="w-full max-w-md mx-auto bg-white p-6 rounded-xl shadow space-y-4">
+    <header class="header_area">
+      <div class="main_menu">
+        <nav class="navbar navbar-expand-lg navbar-light">
+          <div class="container">
+            <a class="navbar-brand logo_h"><router-link to="/"><img src="/aroma/img/logo.png" alt=""></router-link></a>
+            <div class="collapse navbar-collapse offset" id="navbarSupportedContent">
+              <ul class="nav navbar-nav menu_nav ml-auto mr-auto">
+                <h4 class="container mt-2">忘記密碼？</h4>
+              </ul>
+            </div>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+  <div>
+      <label class="block text-sm font-medium">電子郵件</label>
+      <input
+        type="email"
+        v-model="email"
+        class="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+        required
+      />
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">新密碼</label>
+      <input
+        v-model="newPassword"
+        type="password"
+        class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400"
+        required
+      />
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">確認新密碼</label>
+      <input
+        v-model="confirmPassword"
+        type="password"
+        class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400"
+        required
+      />
+    </div>
+
+    <div v-if="errorMessage" class="text-red-500 text-sm">{{ errorMessage }}</div>
+    <div v-if="successMessage" class="text-green-600 text-sm">{{ successMessage }}</div>
+
+    <button type="submit" class="nav-item">確認修改</button>
+    <p class="text-center text-sm text-gray-500">
+      <router-link to="/" class="text-blue-500 hover:underline">回首頁</router-link>
+    </p>
+
+    <footer class="footer mt-5">
+      <div class="footer-area">
+        <div class="container">
+          <p class="text-center pt-5">© 2025 Aroma Shop. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+
+  </form>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+
+const oldPassword = ref('')
+const newPassword = ref('')
+const confirmPassword = ref('')
+
+const errorMessage = ref('')
+const successMessage = ref('')
+
+const handleSubmit = async () => {
+  errorMessage.value = ''
+  successMessage.value = ''
+
+  if (!oldPassword.value || !newPassword.value || !confirmPassword.value) {
+    errorMessage.value = '請填寫所有欄位'
+    return
+  }
+
+  if (newPassword.value !== confirmPassword.value) {
+    errorMessage.value = '新密碼與確認密碼不相符'
+    return
+  }
+
+  try {
+    const res = await fetch('http://localhost:3000/api/reset-password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify({
+        oldPassword: oldPassword.value,
+        newPassword: newPassword.value
+      })
+    })
+
+    if (!res.ok) throw new Error('密碼更新失敗')
+
+    successMessage.value = '密碼更新成功'
+    oldPassword.value = ''
+    newPassword.value = ''
+    confirmPassword.value = ''
+  } catch (err) {
+    errorMessage.value = err.message || '發生錯誤'
+  }
+}
+</script>
+
+
+================================================================================
+// File: D:\node_practice\vue-project\aroma-shop_0719\src\views\AboutView.vue
+================================================================================
+<template>
+  <div class="about">
+    <h1>This is an about page</h1>
+  </div>
+</template>
+
+
+================================================================================
+// File: D:\node_practice\vue-project\aroma-shop_0719\src\views\Cart.vue
+================================================================================
+<template>
+  <div class="container mt-5">
+    <h2>🛒 購物車清單</h2>
+
+    <!-- 表格 -->
+    <table class="table table-bordered mt-4" v-if="cart.items.length > 0">
+      <thead>
+        <tr>
+          <th>商品名稱</th>
+          <th>單價</th>
+          <th>數量</th>
+          <th>總價</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="item in cart.items" :key="item.id">
+          <td>{{ item.name }}</td>
+          <td>${{ item.price.toFixed(2) }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>${{ (item.price * item.quantity).toFixed(2) }}</td>
+          <td>
+            <button class="btn btn-sm btn-success" @click="increase(item.id)">＋</button>
+            <button class="btn btn-sm btn-warning mx-1" @click="decrease(item.id)">－</button>
+            <button class="btn btn-sm btn-danger" @click="cart.removeItem(item.id)">❌</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 沒有商品時 -->
+    <div v-else>
+      <p>購物車是空的。</p>
+    </div>
+
+    <!-- 總價與操作按鈕 -->
+    <div class="text-right mt-4" v-if="cart.items.length > 0">
+      <h4>總金額：${{ cart.totalPrice.toFixed(2) }}</h4>
+      <button class="btn btn-warning mt-3" @click="cart.clearCart()">清空購物車</button>
+
+      <!-- ✅ 加入的「前往結帳」按鈕 -->
+      <router-link to="/checkout">
+        <button class="btn btn-primary mt-3 ml-2">前往結帳</button>
+      </router-link>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { useCartStore } from '@/stores/cart'
+const cart = useCartStore()
+console.log('🛒 購物車頁面載入時的項目：', cart.items)
+
+// 增加數量
+function increase(id) {
+  const item = cart.items.find(p => p.id === id)
+  if (item) item.quantity++
+}
+
+// 減少數量（最小為 1）
+function decrease(id) {
+  const item = cart.items.find(p => p.id === id)
+  if (item && item.quantity > 1) {
+    item.quantity--
+  }
+}
+</script>
+
+
+================================================================================
+// File: D:\node_practice\vue-project\aroma-shop_0719\src\views\Checkout.vue
+================================================================================
+<template>
+  <div class="container mt-5">
+    <h2>📝 結帳表單</h2>
+
+    <form @submit.prevent="submitOrder">
+      <div class="form-group">
+        <label>姓名</label>
+        <input v-model="form.name" type="text" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label>地址</label>
+        <input v-model="form.address" type="text" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label>電話</label>
+        <input v-model="form.phone" type="text" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label>備註</label>
+        <textarea v-model="form.note" class="form-control"></textarea>
+      </div>
+
+      <button class="btn btn-success mt-3" type="submit">送出訂單</button>
+    </form>
+  </div>
+</template>
+
+<script setup>
+import { reactive } from 'vue'
+import { useCartStore } from '@/stores/cart'
+import axios from 'axios'
+
+const cart = useCartStore()
+
+const form = reactive({
+  name: '',
+  address: '',
+  phone: '',
+  note: ''
+})
+
+async function submitOrder() {
+  try {
+    const payload = {
+      ...form,
+      items: cart.items
+    }
+
+    const res = await axios.post('http://localhost:3000/api/orders', payload)
+    console.log('✅ 訂單送出成功', res.data)
+
+    alert('✅ 訂單已送出！')
+    cart.clearCart()
+  } catch (err) {
+    console.error('❌ 訂單送出失敗', err)
+    alert('❌ 訂單送出失敗，請稍後再試')
+  }
+}
+</script>
+
+
+================================================================================
+// File: D:\node_practice\vue-project\aroma-shop_0719\src\views\Home.vue
+================================================================================
+<template>
+  <div>
+    <!-- Header 區塊 -->
+    <header class="header_area">
+      <div class="main_menu">
+        <nav class="navbar navbar-expand-lg navbar-light">
+          <div class="container">
+            <a class="navbar-brand logo_h" href="#"><img src="/aroma/img/logo.png" alt=""></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+              <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+            </button>
+            <div class="collapse navbar-collapse offset" id="navbarSupportedContent">
+              <ul class="nav navbar-nav menu_nav ml-auto mr-auto">
+                <li class="nav-item active"><a class="nav-link" href="#">Home</a></li>
+              </ul>
+              <ul class="nav-shop">
+                <li class="nav-item"><button><i class="ti-search"></i></button></li>
+                <li class="nav-item">
+                  <button @click="showCart = !showCart">
+                    <i class="ti-shopping-cart"></i>
+                    <span class="nav-shop__circle">{{ cart.items.length }}</span>
+                  </button>
+                </li>
+                <li class="nav-item"><a class="button button-header" href="#">Buy Now</a></li>
+              </ul>
+              <ul class="nav navbar-nav menu_nav">
+                <li class="nav-item active">
+                  <router-link to="/login" class="nav-link">登入&nbsp;</router-link>
+                </li>
+              </ul>
+              <ul>/</ul>
+              <ul class="nav navbar-nav menu_nav">
+                <li class="nav-item active">
+                  <router-link to="/register" class="nav-link">&nbsp;註冊</router-link>
+                </li>
+              </ul>
+              <!-- 如果已登入 -->
+              <!-- <ul class="nav navbar-nav menu_nav" v-if="auth.isLoggedIn">
+                <li class="nav-item">
+                  <span class="nav-link">您好，{{ auth.user.name }}</span>
+                </li>
+                <li class="nav-item">
+                  <router-link to="/profile" class="nav-link">會員中心</router-link>
+                </li>
+                <li class="nav-item">
+                  <button class="nav-link" @click="auth.logout">登出</button>
+                </li>
+              </ul> -->
+              
+              <!-- 如果未登入 -->
+              <!-- <ul class="nav navbar-nav menu_nav" v-else>
+                <li class="nav-item">
+                  <router-link to="/login" class="nav-link">登入</router-link>
+                </li>
+                <li class="nav-item">
+                  <router-link to="/register" class="nav-link">註冊</router-link>
+                </li>
+              </ul> -->
+            </div>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Hero 區塊 -->
+    <section class="hero-banner">
+      <div class="container">
+        <div class="row no-gutters align-items-center pt-60px">
+          <div class="col-5 d-none d-sm-block">
+            <div class="hero-banner__img">
+              <img class="img-fluid" src="/aroma/img/home/hero-banner.png" alt="">
+            </div>
+          </div>
+          <div class="col-sm-7 col-lg-6 offset-lg-1 pl-4 pl-md-5 pl-lg-0">
+            <div class="hero-banner__content">
+              <h4>Shop is fun</h4>
+              <h1>Browse Our Premium Product</h1>
+              <p>Us which over of signs divide dominion deep fill bring...</p>
+              <a class="button button-hero" href="#">Browse Now</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trending Products 區塊 -->
+    <section class="section-margin calc-60px">
+      <div class="container">
+        <div class="section-intro pb-60px">
+          <p>Popular Item in the market</p>
+          <h2>Trending <span class="section-intro__style">Product</span></h2>
+        </div>
+        <div class="row">
+          <div v-for="product in products" :key="product.id" class="col-md-6 col-lg-4 col-xl-3">
+            <div class="card text-center card-product">
+              <div class="card-product__img">
+                <img class="card-img" :src="product.image" :alt="product.name" />
+                <ul class="card-product__imgOverlay">
+                  <li><button><i class="ti-search"></i></button></li>
+                  <li><button><i class="ti-shopping-cart"></i></button></li>
+                  <li><button><i class="ti-heart"></i></button></li>
+                </ul>
+              </div>
+              <div class="card-body">
+                <p>{{ product.category }}</p>
+                <h4 class="card-product__title"><a href="#">{{ product.name }}</a></h4>
+                <p class="card-product__price">${{ product.price }}</p>
+                <button class="btn btn-sm btn-primary mt-2" @click="addToCart(product)">
+                  🛒 加入購物車
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ✅ 彈出購物車視窗 -->
+    <div class="cart-popup" v-if="showCart">
+      <div class="cart-popup-inner">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5>🛒 購物車</h5>
+          <router-link to="/cart" class="btn btn-sm btn-info">管理購物車</router-link>
+        </div>
+
+        <ul>
+          <li v-for="item in cart.items" :key="item.id" class="cart-item">
+            <img :src="item.image" alt="商品圖片" class="cart-item-image" />
+            <div class="cart-item-info">
+              <p class="mb-1">{{ item.name }} × {{ item.quantity }}</p>
+              <p class="mb-0 text-muted">${{ (item.price * item.quantity).toFixed(2) }}</p>
+            </div>
+          </li>
+        </ul>
+
+        <p class="mt-2"><strong>總金額：</strong> ${{ cart.totalPrice.toFixed(2) }}</p>
+
+        <div class="d-flex justify-content-between mt-3">
+          <button class="btn btn-sm btn-secondary" @click="showCart = false">關閉</button>
+          <router-link to="/checkout" class="btn btn-sm btn-success">前往結帳</router-link>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer 區塊 -->
+    <footer class="footer mt-5">
+      <div class="footer-area">
+        <div class="container">
+          <p class="text-center pt-5">© 2025 Aroma Shop. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import { useCartStore } from '@/stores/cart'
+
+const cart = useCartStore()
+const showCart = ref(false)
+
+const products = [
+  {
+    id: 1,
+    name: 'Quartz Belt Watch',
+    price: 150,
+    category: 'Accessories',
+    image: '/aroma/img/product/product1.png'
+  },
+  {
+    id: 2,
+    name: 'Women Freshwash',
+    price: 120,
+    category: 'Beauty',
+    image: '/aroma/img/product/product2.png'
+  },
+  {
+    id: 3,
+    name: 'Room Flash Light',
+    price: 90,
+    category: 'Decor',
+    image: '/aroma/img/product/product3.png'
+  },
+  {
+    id: 4,
+    name: 'Room Flash Light',
+    price: 90,
+    category: 'Decor',
+    image: '/aroma/img/product/product4.png'
+  },
+  {
+    id: 5,
+    name: 'Man Office Bag',
+    price: 180,
+    category: 'Accessories',
+    image: '/aroma/img/product/product5.png'
+  },
+  {
+    id: 6,
+    name: 'Charging Car',
+    price: 200,
+    category: 'Kids Toy',
+    image: '/aroma/img/product/product6.png'
+  },
+  {
+    id: 7,
+    name: 'Blutooth Speaker',
+    price: 100,
+    category: 'Accessories',
+    image: '/aroma/img/product/product7.png'
+  },
+  {
+    id: 8,
+    name: 'Charging Car',
+    price: 200,
+    category: 'Kids Toy',
+    image: '/aroma/img/product/product8.png'
+  }
+]
+
+function addToCart(product) {
+  cart.addItem({ ...product, quantity: 1 })
+  showCart.value = true
+}
+</script>
+
+<style scoped>
+.cart-popup {
+  position: fixed;
+  top: 90px;
+  right: 20px;
+  width: 320px;
+  background: #fff;
+  border: 1px solid #ddd;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.15);
+  padding: 15px;
+  z-index: 1000;
+  border-radius: 8px;
+}
+.cart-popup-inner {
+  font-size: 14px;
+}
+.cart-popup-inner ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.cart-item {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid #eee;
+}
+.cart-item-image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.cart-item-info {
+  flex: 1;
+}
+</style>
+
+
+================================================================================
+// File: D:\node_practice\vue-project\aroma-shop_0719\src\views\HomeView.vue
+================================================================================
+<template>
+  <div class="home">
+    <img alt="Vue logo" src="../assets/logo.png">
+    <HelloWorld msg="Welcome to Your Vue.js App"/>
+  </div>
+</template>
+
+<script>
+// @ is an alias to /src
+import HelloWorld from '@/components/HelloWorld.vue'
+
+export default {
+  name: 'HomeView',
+  components: {
+    HelloWorld
+  }
+}
+</script>
+
+
+================================================================================
+// File: D:\node_practice\vue-project\aroma-shop_0719\src\views\LoginPage.vue
+================================================================================
+<template>
+  <div class="min-h-screen flex items-center justify-center bg-gray-100">
+    <LoginForm />
+  </div>
+</template>
+
+<script setup>
+import LoginForm from '@/components/LoginForm.vue'
+// import { useAuthStore } from '@/stores/auth'
+
+// const auth = useAuthStore()
+
+// // 登入
+// auth.login({ name: '王小明', email: 'test@example.com' })
+
+// // 顯示名稱
+// console.log(auth.user.name)  // 王小明
+
+// // 登出
+// auth.logout()
+</script>
+
+<!-- src/views/LoginPage.vue -->
+<!-- <template>
+  <div class="login-page">
+    <h2>會員登入</h2>
+    <form @submit.prevent="handleLogin">
+      <input v-model="email" type="email" placeholder="Email" required />
+      <input v-model="password" type="password" placeholder="密碼" required />
+      <button type="submit">登入</button>
+    </form>
+    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth' // ✅ 注意路徑是否正確
+
+const email = ref('')
+const password = ref('')
+const errorMessage = ref('')
+const router = useRouter()
+
+const authStore = useAuthStore() // ✅ 呼叫 store
+
+const handleLogin = async () => {
+  try {
+    // 模擬後端驗證（可換成 fetch 實作）
+    if (email.value === 'test@example.com' && password.value === '123456') {
+      const fakeUser = { email: email.value, name: '測試用戶' }
+      authStore.login(fakeUser)
+      router.push('/profile') // 登入成功後導向會員頁
+    } else {
+      errorMessage.value = '帳號或密碼錯誤'
+    }
+  } catch (err) {
+    errorMessage.value = '發生錯誤，請稍後再試'
+  }
+}
+</script>
+
+<style scoped>
+.login-page {
+  max-width: 400px;
+  margin: 40px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+input {
+  padding: 10px;
+  font-size: 1rem;
+}
+button {
+  padding: 10px;
+  background-color: #42b983;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+.error {
+  color: red;
+}
+</style> -->
+
+
+================================================================================
+// File: D:\node_practice\vue-project\aroma-shop_0719\src\views\ManagerPage.vue
+================================================================================
+<template>
+  <header class="header_area">
+    <div class="main_menu">
+      <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+          <a class="navbar-brand logo_h"><router-link to="/"><img src="/aroma/img/logo.png" alt=""></router-link></a>
+          <div class="collapse navbar-collapse offset" id="navbarSupportedContent">
+            <ul class="nav navbar-nav menu_nav ml-auto mr-auto">
+              <h4 class="container mt-2">登入</h4>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <div class="admin-container">
+    <h2>後台管理系統</h2>
+    <ul class="nav nav-tabs">
+      <li class="nav-item" v-for="tab in tabs" :key="tab.id">
+        <a class="nav-link" :class="{ active: currentTab === tab.id }" href="#" @click.prevent="currentTab = tab.id">
+          {{ tab.label }}
+        </a>
+      </li>
+    </ul>
+
+    <component :is="currentTabComponent" />
+  </div>
+
+  <footer class="footer mt-5">
+    <div class="footer-area">
+      <div class="container">
+        <p class="text-center pt-5">© 2025 Aroma Shop. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+</template>
+
+<script setup>
+import { ref, computed } from 'vue'
+
+import MemberOrdersTable from '@/components/MemberOrdersTable.vue'
+import ProductInventory from '@/components/ProductInventory.vue' // ✅ 新增元件
+
+// import ProductForm from '@/components/ProductForm.vue'       // ❌ 註解
+// import AdminForm from '@/components/AdminForm.vue'           // ❌ 註解
+
+const currentTab = ref('memberOrders')
+
+const tabs = [
+  { id: 'memberOrders', label: '會員與訂單管理' },
+  { id: 'products', label: '商品庫存查詢' }
+  // { id: 'addProduct', label: '商品上架' }, // ❌ 註解
+  // { id: 'admins', label: '新增管理員' }    // ❌ 註解
+]
+
+const currentTabComponent = computed(() => {
+  switch (currentTab.value) {
+    case 'memberOrders': return MemberOrdersTable
+    case 'products': return ProductInventory
+    // case 'addProduct': return ProductForm
+    // case 'admins': return AdminForm
+  }
+})
+</script>
+
+
+================================================================================
+// File: D:\node_practice\vue-project\aroma-shop_0719\src\views\ProfilePage.vue
+================================================================================
+<template>
+    會員資料頁面施工中
+</template>
+
+================================================================================
+// File: D:\node_practice\vue-project\aroma-shop_0719\src\views\RegisterPage.vue
+================================================================================
+<template>
+  <div class="min-h-screen flex items-center justify-center bg-gray-100">
+    <RegisterForm />
+  </div>
+</template>
+
+<script setup>
+import RegisterForm from '@/components/RegisterForm.vue'
+</script>
+
+
+================================================================================
+// File: D:\node_practice\vue-project\aroma-shop_0719\src\views\ResetPasswordPage.vue
+================================================================================
+<template>
+  <div class="min-h-screen flex items-center justify-center bg-gray-100">
+    <ResetPasswordForm />
+  </div>
+</template>
+
+<script setup>
+import ResetPasswordForm from '@/components/ResetPasswordForm.vue'
+</script>
+
+
