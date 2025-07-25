@@ -1,19 +1,29 @@
 // stores/auth.js
-// import { defineStore } from 'pinia'
-// import { ref, computed } from 'vue'
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
 
-// export const useAuthStore = defineStore('auth', () => {
-//   const user = ref(null)
-//   const isLoggedIn = computed(() => !!user.value)
+export const useAuthStore = defineStore('auth', () => {
+  const token = ref('')
+  const userEmail = ref('')
+  const userName = ref('')
+  const isManager = ref(false)
 
-//   function login(userData) {
-//     user.value = userData
-//     // 可以儲存到 localStorage
-//   }
+  function setAuth({ token: t, userEmail: e, userName: n, isManager: m }) {
+    token.value = t
+    userEmail.value = e
+    userName.value = n
+    isManager.value = m
+  }
 
-//   function logout() {
-//     user.value = null
-//   }
+  function logout() {
+    token.value = ''
+    userEmail.value = ''
+    userName.value = ''
+    isManager.value = false
+    localStorage.clear()
+  }
 
-//   return { user, isLoggedIn, login, logout }
-// })
+  return { token, userEmail, userName, isManager, setAuth, logout }
+})
+
+

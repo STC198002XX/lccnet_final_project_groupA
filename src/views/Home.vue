@@ -21,41 +21,35 @@
                     <span class="nav-shop__circle">{{ cart.items.length }}</span>
                   </button>
                 </li>
-                <li class="nav-item"><a class="button button-header" href="#">Buy Now</a></li>
-              </ul>
-              <ul class="nav navbar-nav menu_nav">
-                <li class="nav-item active">
-                  <router-link to="/login" class="nav-link">登入&nbsp;</router-link>
-                </li>
-              </ul>
-              <ul>/</ul>
-              <ul class="nav navbar-nav menu_nav">
-                <li class="nav-item active">
-                  <router-link to="/register" class="nav-link">&nbsp;註冊</router-link>
-                </li>
+                <li class="nav-item"><a class="button button-header" href="#" @click.prevent="scrollToTrending">Buy Now</a></li>
               </ul>
               <!-- 如果已登入 -->
-              <!-- <ul class="nav navbar-nav menu_nav" v-if="auth.isLoggedIn">
+              <ul class="nav navbar-nav menu_nav" v-if="isLoggedIn">
                 <li class="nav-item">
-                  <span class="nav-link">您好，{{ auth.user.name }}</span>
+                  <span class="nav-link">您好，{{ displayName }}</span>
                 </li>
                 <li class="nav-item">
-                  <router-link to="/profile" class="nav-link">會員中心</router-link>
+                  <span class="nav-link text-gray-200">|</span>
                 </li>
                 <li class="nav-item">
-                  <button class="nav-link" @click="auth.logout">登出</button>
+                  <router-link to="/member/profile" class="nav-link">會員中心</router-link>
                 </li>
-              </ul> -->
+                <li class="nav-item">
+                  <span class="nav-link text-gray-200">|</span>
+                </li>
+                <li class="nav-item mt-10">
+                  <a href="#" class="nav-link" @click="auth.logout">登出</a>
+                </li>
+              </ul>
               
               <!-- 如果未登入 -->
-              <!-- <ul class="nav navbar-nav menu_nav" v-else>
-                <li class="nav-item">
+              <ul class="nav navbar-nav menu_nav" v-else>
+                <li class="nav-item active">
                   <router-link to="/login" class="nav-link">登入</router-link>
-                </li>
-                <li class="nav-item">
+                  <span class="mx-1 text-gray-200">|</span>
                   <router-link to="/register" class="nav-link">註冊</router-link>
                 </li>
-              </ul> -->
+              </ul>
             </div>
           </div>
         </nav>
@@ -76,7 +70,7 @@
               <h4>Shop is fun</h4>
               <h1>Browse Our Premium Product</h1>
               <p>Us which over of signs divide dominion deep fill bring...</p>
-              <a class="button button-hero" href="#">Browse Now</a>
+              <!-- <a class="button button-hero" href="#">Browse Now</a> -->
             </div>
           </div>
         </div>
@@ -84,7 +78,7 @@
     </section>
 
     <!-- Trending Products 區塊 -->
-    <section class="section-margin calc-60px">
+    <section ref="trendingSection" class="section-margin calc-60px">
       <div class="container">
         <div class="section-intro pb-60px">
           <p>Popular Item in the market</p>
@@ -154,11 +148,19 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+// import { ref } from 'vue'
+import { computed } from 'vue'
 import { useCartStore } from '@/stores/cart'
+import { useAuthStore } from '@/stores/auth'
 
+const auth = useAuthStore()
 const cart = useCartStore()
 const showCart = ref(false)
+const trendingSection = ref(null)
+
+const isLoggedIn = computed(() => !!auth.token)
+const displayName = computed(() => auth.userName || auth.userEmail)
 
 const products = [
   {
@@ -223,6 +225,14 @@ function addToCart(product) {
   cart.addItem({ ...product, quantity: 1 })
   showCart.value = true
 }
+
+
+function scrollToTrending() {
+  if (trendingSection.value) {
+    trendingSection.value.scrollIntoView({ behavior: 'smooth' })
+  }
+}
+
 </script>
 
 <style scoped>

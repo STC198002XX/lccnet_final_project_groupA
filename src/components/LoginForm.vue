@@ -64,11 +64,13 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
 const email = ref('')
 const password = ref('')
 const errorMessage = ref('')
 const router = useRouter()
+const auth = useAuthStore()
 
 const handleLogin = async () => {
   if (!email.value || !password.value) {
@@ -89,11 +91,21 @@ const handleLogin = async () => {
     // 儲存登入狀態 (範例：localStorage + Pinia 可擴充)
     localStorage.setItem('token', data.token)
     localStorage.setItem('manager', data.manager) // 👈 加上這行，才能跳往/manager
+    localStorage.setItem('userName', data.user?.email || '')
+
+    auth.setAuth({
+      token: data.token,
+      userEmail: data.email || data.user?.email,
+      userName: data.user?.name || '', // 若你有 name 欄位
+      isManager: data.manager
+    })
+    
     //加入跳轉管理者頁面
     if (data.manager === true) {
       router.push('/manager') 
     } else {
-      router.push('/member/profile')
+      router.push('/')
+      // router.push('/member/profile')
     }
 
   } catch (err) {
