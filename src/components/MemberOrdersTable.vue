@@ -8,7 +8,7 @@
           <th>姓名</th>
           <th>Email</th>
           <th>註冊時間</th>
-          <th>頭像</th>
+          <!-- <th>頭像</th> -->
           <th>訂單</th>
         </tr>
       </thead>
@@ -18,7 +18,7 @@
           <td>{{ user.name }}</td>
           <td>{{ user.email }}</td>
           <td>{{ user.registered }}</td>
-          <td><img src="aroma/img/r1.jpg" alt="avatar" style="height: 50px;"></td>
+          <!-- <td><img src="aroma/img/r1.jpg" alt="avatar" style="height: 50px;"></td> -->
           <td>
             <table class="table">
               <thead>
@@ -49,25 +49,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref,onMounted } from 'vue'
 
-const users = ref([
-  {
-    id: 1,
-    name: '王小明',
-    email: 'ming@example.com',
-    registered: '2025-07-01',
-    orders: [
-      { id: '#1001', amount: '$500', status: '已出貨' },
-      { id: '#1002', amount: '$300', status: '處理中' }
-    ]
-  },
-  {
-    id: 2,
-    name: '林小美',
-    email: 'mei@example.com',
-    registered: '2025-07-05',
-    orders: []
-  }
-])
+const users = ref([])
+
+onMounted(async () => {
+  const res = await fetch('http://localhost:3000/api/users')
+  users.value = await res.json()
+})
 </script>

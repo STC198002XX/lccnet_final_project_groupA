@@ -42,15 +42,15 @@ import { ref, computed } from 'vue'
 import MemberOrdersTable from '@/components/MemberOrdersTable.vue'
 import ProductInventory from '@/components/ProductInventory.vue' // ✅ 新增元件
 
-// import ProductForm from '@/components/ProductForm.vue'       // ❌ 註解
+import ProductForm from '@/components/ProductForm.vue'       // ✅ 元件加回去
 // import AdminForm from '@/components/AdminForm.vue'           // ❌ 註解
 
 const currentTab = ref('memberOrders')
 
 const tabs = [
   { id: 'memberOrders', label: '會員與訂單管理' },
-  { id: 'products', label: '商品庫存查詢' }
-  // { id: 'addProduct', label: '商品上架' }, // ❌ 註解
+  { id: 'products', label: '商品庫存查詢' },
+  { id: 'addProduct', label: '商品上架' } // ✅ 元件加回去
   // { id: 'admins', label: '新增管理員' }    // ❌ 註解
 ]
 
@@ -58,7 +58,7 @@ const currentTabComponent = computed(() => {
   switch (currentTab.value) {
     case 'memberOrders': return MemberOrdersTable
     case 'products': return ProductInventory
-    // case 'addProduct': return ProductForm
+    case 'addProduct': return ProductForm
     // case 'admins': return AdminForm
   }
 })
