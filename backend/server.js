@@ -51,7 +51,7 @@ app.get('/api/products', async (req, res) => {
   }
 })
 
-// 取得一般會員（非管理員）資料
+// 取得一般會員（非管理員）資料 + 真實 orders
 app.get('/api/users', async (req, res) => {
   const client = new MongoClient(uri)
   try {
@@ -61,15 +61,21 @@ app.get('/api/users', async (req, res) => {
       .find({ manager: false }, { projection: { password: 0 } })
       .toArray()
 
-    // 加入每個使用者的測試訂單（前端先不連結 orders collection）
-    const usersWithOrders = users.map(user => ({
-      ...user,
-      orders: [
-        { id: '#TEST1001', amount: '$999', status: '測試出貨' }
-      ]
-    }))
+    const orders = await db.collection('orders').find().toArray()
 
-    res.json(usersWithOrders)
+    // 依 user.id 對應 orders
+    const userMap = users.map(user => {
+      const userOrders = orders
+        .filter(order => order.user_id === user.id)
+        .map(order => ({
+          id: order.order_id,
+          amount: `$${order.amount}`,
+          status: order.status
+        }))
+      return { ...user, orders: userOrders }
+    })
+
+    res.json(userMap)
   } catch (err) {
     res.status(500).json({ message: '伺服器錯誤', error: err.message })
   } finally {

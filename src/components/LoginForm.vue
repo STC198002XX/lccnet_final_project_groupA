@@ -89,7 +89,7 @@ const handleLogin = async () => {
     if (!res.ok) throw new Error(data.message || '登入失敗')
 
     // 儲存登入狀態 (範例：localStorage + Pinia 可擴充)
-    localStorage.setItem('token', data.token)
+   // localStorage.setItem('token', data.token)
     localStorage.setItem('manager', data.manager) // 👈 加上這行，才能跳往/manager
     localStorage.setItem('userName', data.user?.email || '')
 

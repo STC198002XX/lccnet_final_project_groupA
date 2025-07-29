@@ -18,7 +18,7 @@
           <td>{{ user.name }}</td>
           <td>{{ user.email }}</td>
           <td>{{ user.registered }}</td>
-          <!-- <td><img src="aroma/img/r1.jpg" alt="avatar" style="height: 50px;"></td> -->
+          <!-- <td><img src="aroma/img/r1.jpg" alt="avatar" style="height: 50px;"></td> --> 
           <td>
             <table class="table">
               <thead>
@@ -26,7 +26,7 @@
                   <th>訂單編號</th>
                   <th>金額</th>
                   <th>狀態</th>
-                  <th>圖片</th>
+                  <!-- <th>圖片</th> -->
                 </tr>
               </thead>
               <tbody>
@@ -34,10 +34,10 @@
                   <td>{{ order.id }}</td>
                   <td>{{ order.amount }}</td>
                   <td>{{ order.status }}</td>
-                  <td><img src="aroma/img/r3.jpg" alt="product" style="height: 50px;"></td>
+                  <!-- <td><img src="aroma/img/r3.jpg" alt="product" style="height: 50px;"></td> -->
                 </tr>
                 <tr v-if="user.orders.length === 0">
-                  <td colspan="4">無訂單</td>
+                  <td colspan="3">無訂單</td>
                 </tr>
               </tbody>
             </table>
