@@ -16,9 +16,12 @@ app.post('/api/login', async (req, res) => {
   const client = new MongoClient(uri)
 
   try {
+    console.log('登入請求收到:', email, password)
     await client.connect()
     const db = client.db(dbName)
     const user = await db.collection('users').findOne({ email })
+
+    console.log('找到使用者:', user)
 
     if (!user || user.password !== password) {
       return res.status(401).json({ message: '帳號或密碼錯誤' })
@@ -27,9 +30,14 @@ app.post('/api/login', async (req, res) => {
     res.json({
       message: '登入成功',
       token: 'fake-jwt-token',           // 可改為 JWT 實作
-      manager: user.manager === true     // 是否為管理員
+      manager: user.manager === true,     // 是否為管理員
+      user: {
+      email: user.email,
+      name: user.name
+  }
     })
   } catch (err) {
+    console.error('❌ 登入發生錯誤:', err)
     res.status(500).json({ message: '伺服器錯誤', error: err.message })
   } finally {
     await client.close()
