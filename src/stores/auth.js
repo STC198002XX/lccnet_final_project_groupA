@@ -1,6 +1,7 @@
 // stores/auth.js
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { useCartStore } from './cart'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref('')
@@ -21,6 +22,16 @@ export const useAuthStore = defineStore('auth', () => {
     userName.value = ''
     isManager.value = false
     localStorage.clear()
+
+    // ✅ 清空購物車
+    const cart = useCartStore()
+    cart.clearCart()
+
+    // ✅ 清除 localStorage（或只清除必要項目）
+    // localStorage.clear()
+    localStorage.removeItem('pinia-cart')
+    localStorage.removeItem('userEmail')
+    localStorage.removeItem('token')
   }
 
   return { token, userEmail, userName, isManager, setAuth, logout }
