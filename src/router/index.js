@@ -5,6 +5,8 @@ import Checkout from '../views/Checkout.vue'
 import LoginPage from '@/views/LoginPage.vue'
 import RegisterPage from '@/views/RegisterPage.vue'
 import ResetPasswordPage from '@/views/ResetPasswordPage.vue'
+import Shop from '../views/CategoryView.vue'
+import Product from '../views/ProductView.vue'
 import ManagerPage from '@/views/ManagerPage.vue' // ✅ 新增管理者頁面
 import ProfilePage from '@/views/ProfilePage.vue' // ✅ 會員頁面（建議有）
 
@@ -12,6 +14,8 @@ const routes = [
   { path: '/', name: 'Home', component: Home },
   { path: '/login', component: LoginPage },
   { path: '/register', component: RegisterPage },
+  { path: '/shop', name: 'Shop', component: Shop },
+  { path: '/product/:id', name: 'Product', component: Product },
   { path: '/member/reset-password', component: ResetPasswordPage },
   { path: '/cart', name: 'Cart', component: Cart },
   { path: '/checkout', name: 'Checkout', component: Checkout },

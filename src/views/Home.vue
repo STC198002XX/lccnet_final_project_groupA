@@ -12,6 +12,7 @@
             <div class="collapse navbar-collapse offset" id="navbarSupportedContent">
               <ul class="nav navbar-nav menu_nav ml-auto mr-auto">
                 <li class="nav-item active"><a class="nav-link" href="#">Home</a></li>
+                <li class="nav-item active"><router-link to="/shop" class="nav-link">Shop</router-link></li>
               </ul>
               <ul class="nav-shop">
                 <li class="nav-item"><button><i class="ti-search"></i></button></li>
