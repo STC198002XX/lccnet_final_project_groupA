@@ -39,7 +39,7 @@
                   </button>
                 </div> -->
               </div>
-              <button class="button primary-btn" @click="addToCart">Add to Cart</button>
+              <button class="button primary-btn" @click="handleAddToCart">Add to Cart</button>
             </div>
           </div>
         </div>
@@ -59,11 +59,15 @@
 </template>
   
 <script setup>
-  import { ref, onMounted } from 'vue'
+  import { ref, onMounted, computed } from 'vue'
   import { useRoute } from 'vue-router'
+  import { useAuthStore } from '@/stores/auth'
   import { useCartStore } from '@/stores/cart'
   import Header from '@/components/Header.vue'
   import BannerProps from '../components/BannerProps.vue'
+  
+  const auth = useAuthStore()
+  const isLoggedIn = computed(() => !!auth.token && !!auth.userEmail)
   
   const route = useRoute()
   const cart = useCartStore()
@@ -98,4 +102,13 @@
       stock: data.stock ?? 10 // 假設後端沒傳 stock 就預設 10
     }
   })
+
+  function handleAddToCart() {
+  if (!isLoggedIn.value) {
+    alert('請先登入')
+    return
+  }
+
+  addToCart() // 原本的加入購物車邏輯
+  }
 </script>
