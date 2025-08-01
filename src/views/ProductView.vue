@@ -90,7 +90,7 @@
     const res = await fetch(`http://localhost:3000/api/products/${id}`)
     const data = await res.json()
     product.value = {
-      id: data.product_id,
+      product_id: data.product_id,
       name: data.name,
       price: data.price,
       image: data.image,
