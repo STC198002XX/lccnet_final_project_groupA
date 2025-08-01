@@ -15,9 +15,8 @@
                 <li class="nav-item active"><router-link to="/shop" class="nav-link">Shop</router-link></li>
               </ul>
               <ul class="nav-shop">
-                <li class="nav-item"><button><i class="ti-search"></i></button></li>
                 <li class="nav-item">
-                  <button @click="showCart = !showCart">
+                  <button @click="handleCartClick">
                     <i class="ti-shopping-cart"></i>
                     <span class="nav-shop__circle">{{ cart.items.length }}</span>
                   </button>
@@ -100,7 +99,7 @@
                 <p>{{ product.category }}</p>
                 <h4 class="card-product__title"><a href="#">{{ product.name }}</a></h4>
                 <p class="card-product__price">${{ product.price }}</p>
-                <button class="btn btn-sm btn-primary mt-2" @click="addToCart(product)">
+                <button class="btn btn-sm btn-primary mt-2" @click="handleAddToCart(product)">
                   🛒 加入購物車
                 </button>
               </div>
@@ -160,7 +159,7 @@ const cart = useCartStore()
 const showCart = ref(false)
 const trendingSection = ref(null)
 
-const isLoggedIn = computed(() => !!auth.token)
+const isLoggedIn = computed(() => !!auth.token && !!auth.userEmail)
 const displayName = computed(() => auth.userName || auth.userEmail)
 
 const products = [
@@ -233,6 +232,24 @@ function scrollToTrending() {
     trendingSection.value.scrollIntoView({ behavior: 'smooth' })
   }
 }
+
+function handleCartClick() {
+  if (!isLoggedIn.value) {
+    alert('請先登入')
+    return
+  }
+  showCart.value = !showCart.value
+}
+
+function handleAddToCart(product) {
+  if (!isLoggedIn.value) {
+    alert('請先登入')
+    return
+  }
+
+  addToCart(product) // 假設你已經有定義這個方法
+}
+
 
 </script>
 
