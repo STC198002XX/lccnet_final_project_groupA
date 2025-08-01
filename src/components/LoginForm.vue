@@ -37,6 +37,35 @@
       />
     </div>
 
+    <!-- <div class="relative">
+      <label class="block text-sm font-medium">密碼</label>
+      <input
+        v-model="password"
+        :type="showPassword ? 'text' : 'password'"
+        class="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 pr-10"
+        required
+      /> -->
+      <!-- 眼睛圖示 -->
+      <!-- <span
+        @click="togglePasswordVisibility"
+        class="absolute right-3 top-9 cursor-pointer text-gray-500"
+      >
+        <svg v-if="showPassword" xmlns="http://www.w3.org/2000/svg" class="h-1 w-1" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+        </svg>
+        <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-1 w-1" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.964 9.964 0 012.788-4.146M9.88 9.88a3 3 0 104.24 4.24M6.1 6.1l11.8 11.8"/>
+        </svg>
+      </span>
+    </div> -->
+
+
     <div v-if="errorMessage" class="text-red-500 text-sm">{{ errorMessage }}</div>
 
     <button type="submit" class="nav-item">登入</button>
@@ -71,6 +100,11 @@ const password = ref('')
 const errorMessage = ref('')
 const router = useRouter()
 const auth = useAuthStore()
+
+const showPassword = ref(false)
+const togglePasswordVisibility = () => {
+  showPassword.value = !showPassword.value
+}
 
 const handleLogin = async () => {
   if (!email.value || !password.value) {

@@ -59,6 +59,49 @@ app.post('/api/login', express.json(), async (req, res) => {
   }
 })
 
+// 註冊 API
+app.post('/api/register', express.json(), async (req, res) => {
+  const { name, email, password } = req.body
+  const client = new MongoClient(uri)
+
+  try {
+    await client.connect()
+    const db = client.db(dbName)
+    const existingUser = await db.collection('users').findOne({ email })
+
+    if (existingUser) {
+      return res.status(400).json({ message: '此 Email 已被註冊' })
+    }
+
+    // 建立新使用者
+    const newUser = {
+      name,
+      email,
+      password, // 注意：實務上應加密！此範例為簡化
+      registered: new Date(),
+      manager: false
+    }
+
+    const result = await db.collection('users').insertOne(newUser)
+
+    res.json({
+      message: '註冊成功',
+      token: 'fake-jwt-token',  // 可改 JWT
+      user: {
+        id: result.insertedId.toString(),
+        name: newUser.name,
+        email: newUser.email,
+        registered: newUser.registered
+      }
+    })
+  } catch (err) {
+    console.error('❌ 註冊錯誤:', err)
+    res.status(500).json({ message: '伺服器錯誤', error: err.message })
+  } finally {
+    await client.close()
+  }
+})
+
 // 取得所有商品 API
 app.get('/api/products', async (req, res) => {
   const client = new MongoClient(uri)

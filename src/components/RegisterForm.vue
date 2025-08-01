@@ -4,7 +4,7 @@
       <div class="main_menu">
         <nav class="navbar navbar-expand-lg navbar-light">
           <div class="container">
-            <a class="navbar-brand logo_h"><router-link to="/"><img src="/aroma/img/logo.png" alt=""></router-link></a>
+            <router-link to="/" class="navbar-brand logo_h"><img src="/aroma/img/logo.png" alt=""></router-link>
             <div class="collapse navbar-collapse offset" id="navbarSupportedContent">
               <ul class="nav navbar-nav menu_nav ml-auto mr-auto">
                 <h4 class="container mt-2">註冊</h4>
@@ -120,6 +120,7 @@ const handleRegister = async () => {
     if (!res.ok) throw new Error(data.message || '註冊失敗')
 
     // 註冊成功後導向登入
+    alert('註冊成功') 
     router.push('/login')
   } catch (err) {
     errorMessage.value = err.message
