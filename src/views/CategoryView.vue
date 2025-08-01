@@ -5,7 +5,7 @@
       <div class="main_menu">
         <nav class="navbar navbar-expand-lg navbar-light">
           <div class="container">
-            <a class="navbar-brand logo_h" href="#"><img src="/aroma/img/logo.png" alt=""></a>
+            <router-link to="/" class="navbar-brand logo_h"><img src="/aroma/img/logo.png" alt=""></router-link>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
               <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
             </button>
