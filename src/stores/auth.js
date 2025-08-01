@@ -8,12 +8,14 @@ export const useAuthStore = defineStore('auth', () => {
   const userEmail = ref('')
   const userName = ref('')
   const isManager = ref(false)
+  const user = ref(null)
 
-  function setAuth({ token: t, userEmail: e, userName: n, isManager: m }) {
+  function setAuth({ token: t, userEmail: e, userName: n, isManager: m, user: u}) {
     token.value = t
     userEmail.value = e
     userName.value = n
     isManager.value = m
+    user.value = u
   }
 
   function logout() {
@@ -21,6 +23,7 @@ export const useAuthStore = defineStore('auth', () => {
     userEmail.value = ''
     userName.value = ''
     isManager.value = false
+    user.value = null
     localStorage.clear()
 
     // ✅ 清空購物車
@@ -34,7 +37,16 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('token')
   }
 
-  return { token, userEmail, userName, isManager, setAuth, logout }
+  function initFromLocal() {
+    token.value = localStorage.getItem('token') || ''
+    userEmail.value = localStorage.getItem('userEmail') || ''
+    userName.value = localStorage.getItem('userName') || ''
+    isManager.value = JSON.parse(localStorage.getItem('isManager') || 'false')
+    const userData = localStorage.getItem('user')
+    user.value = userData ? JSON.parse(userData) : null
+  }
+
+  return { token, userEmail, userName, isManager, user, setAuth, logout, initFromLocal}
 })
 
 

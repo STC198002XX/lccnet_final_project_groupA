@@ -9,7 +9,12 @@ const app = createApp(App)
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
 
+
 app.use(pinia)
 app.use(createPinia())
 app.use(router)
 app.mount('#app')
+
+import { useAuthStore } from '@/stores/auth'
+const auth = useAuthStore()
+auth.initFromLocal()

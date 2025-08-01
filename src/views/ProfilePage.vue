@@ -1,3 +1,10 @@
 <template>
-    會員資料頁面施工中
+    <div class="min-h-screen flex items-center justify-center bg-gray-100">
+    <MemberTable />
+  </div>
 </template>
+
+<script setup>
+import MemberTable from '@/components/MemberTable.vue';
+
+</script>

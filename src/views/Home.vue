@@ -149,7 +149,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref} from 'vue'
 // import { ref } from 'vue'
 import { computed } from 'vue'
 import { useCartStore } from '@/stores/cart'

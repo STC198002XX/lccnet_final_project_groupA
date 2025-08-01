@@ -86,19 +86,28 @@ const handleLogin = async () => {
     })
     const data = await res.json()
     console.log('登入回傳資料：', data)
+    console.log('回傳 user：', data.user)
     if (!res.ok) throw new Error(data.message || '登入失敗')
 
     // 儲存登入狀態 (範例：localStorage + Pinia 可擴充)
    // localStorage.setItem('token', data.token)
     localStorage.setItem('manager', data.manager) // 👈 加上這行，才能跳往/manager
-    localStorage.setItem('userName', data.user?.email || '')
+    localStorage.setItem('userEmail', data.user.email)
+    localStorage.setItem('userName', data.user.name)
 
     auth.setAuth({
       token: data.token,
-      userEmail: data.email || data.user?.email,
-      userName: data.user?.name || '', // 若你有 name 欄位
-      isManager: data.manager
+      userEmail: data.user.email,
+      userName: data.user.name,
+      isManager: data.manager,
+      user: data.user
     })
+
+    localStorage.setItem('token', data.token)
+    localStorage.setItem('userEmail', data.user.email)
+    localStorage.setItem('userName', data.user.name)
+    localStorage.setItem('isManager', JSON.stringify(data.manager))
+    localStorage.setItem('user', JSON.stringify(data.user))
     
     //加入跳轉管理者頁面
     if (data.manager === true) {

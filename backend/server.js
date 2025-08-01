@@ -45,8 +45,10 @@ app.post('/api/login', express.json(), async (req, res) => {
       token: 'fake-jwt-token',           // 可改為 JWT 實作
       manager: user.manager === true,     // 是否為管理員
       user: {
+        id: user._id,
+        name: user.name,
         email: user.email,
-        name: user.name
+        registered: user.registered
       }
     })
   } catch (err) {
