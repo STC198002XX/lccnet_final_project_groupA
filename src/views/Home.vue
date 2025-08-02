@@ -86,7 +86,7 @@
         </div>
         <div class="row">
           <div v-for="product in products" :key="product.id" class="col-md-6 col-lg-4 col-xl-3">
-            <router-link :to="`/product/${product.id}` class="card text-center card-product">
+            <router-link :to="`/product/${product.id}`" class="card text-center card-product">
               <div class="card-product__img">
                 <img class="card-img" :src="product.image" :alt="product.name" />
                 <ul class="card-product__imgOverlay">
