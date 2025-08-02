@@ -86,7 +86,7 @@
         </div>
         <div class="row">
           <div v-for="product in products" :key="product.id" class="col-md-6 col-lg-4 col-xl-3">
-            <div class="card text-center card-product">
+            <router-link :to="`/product/${product.id}` class="card text-center card-product">
               <div class="card-product__img">
                 <img class="card-img" :src="product.image" :alt="product.name" />
                 <ul class="card-product__imgOverlay">
@@ -103,7 +103,7 @@
                   🛒 加入購物車
                 </button>
               </div>
-            </div>
+            </router-link>
           </div>
         </div>
       </div>
@@ -164,60 +164,60 @@ const displayName = computed(() => auth.userName || auth.userEmail)
 
 const products = [
   {
-    id: 1,
-    name: 'Quartz Belt Watch',
-    price: 150,
-    category: 'Accessories',
-    image: '/aroma/img/product/product1.png'
+    id: "product_0043",
+    name: "Premium Reed Diffuser 3000 ML - Bulgarian Rose & Oud",
+    price: 1350,
+    category: "Diffusers",
+    image: "/aroma/img/NewProducts/Premium_Reed_Diffuser_3000_ML_-_Bulgarian_Rose_&_O.jpg"
   },
   {
-    id: 2,
-    name: 'Women Freshwash',
-    price: 120,
-    category: 'Beauty',
-    image: '/aroma/img/product/product2.png'
+    id: "product_0073",
+    name: "Omani lime lipbalm",
+    price: 68,
+    category: "Body Care",
+    image: "/aroma/img/NewProducts/Omani_lime_lipbalm.jpg"
   },
   {
-    id: 3,
-    name: 'Room Flash Light',
-    price: 90,
-    category: 'Decor',
-    image: '/aroma/img/product/product3.png'
+    id: "product_0017",
+    name: "3 wick XL Candle - Velvet Wood",
+    price: 265,
+    category: "Candles",
+    image: "/aroma/img/NewProducts/3_wick_XL_Candle_-_Velvet_Wood.jpg"
   },
   {
-    id: 4,
-    name: 'Room Flash Light',
-    price: 90,
-    category: 'Decor',
-    image: '/aroma/img/product/product4.png'
+    id: "product_0024",
+    name: "Omani Frankincense",
+    price: 142,
+    category: "Diffusers",
+    image: "/aroma/img/NewProducts/Omani_Frankincense.jpg"
   },
   {
-    id: 5,
-    name: 'Man Office Bag',
-    price: 180,
-    category: 'Accessories',
-    image: '/aroma/img/product/product5.png'
+    id: "product_0089",
+    name: "Minois bubble bath",
+    price: 125,
+    category: "Kids",
+    image: "/aroma/img/NewProducts/Minois_bubble_bath.jpg"
   },
   {
-    id: 6,
-    name: 'Charging Car',
-    price: 200,
-    category: 'Kids Toy',
-    image: '/aroma/img/product/product6.png'
+    id: "product_0079",
+    name: "Dukhoon No.2",
+    price: 105,
+    category: "Mukhallat",
+    image: "/aroma/img/NewProducts/Dukhoon_No.2.jpg"
   },
   {
-    id: 7,
-    name: 'Blutooth Speaker',
-    price: 100,
-    category: 'Accessories',
-    image: '/aroma/img/product/product7.png'
+    id: "product_0083",
+    name: "PMLM04",
+    price: 262,
+    category: "Perfumes",
+    image: "/aroma/img/NewProducts/PMLM04.jpg"
   },
   {
-    id: 8,
-    name: 'Charging Car',
-    price: 200,
-    category: 'Kids Toy',
-    image: '/aroma/img/product/product8.png'
+    id: "product_0052",
+    name: "All Over Spray Rose",
+    price: 220,
+    category: "Room Spray",
+    image: "/aroma/img/NewProducts/All_Over_Spray_Rose.jpg"
   }
 ]
 
