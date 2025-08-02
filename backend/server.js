@@ -73,8 +73,14 @@ app.post('/api/register', express.json(), async (req, res) => {
       return res.status(400).json({ message: '此 Email 已被註冊' })
     }
 
+    // ✅ 產生唯一的自訂 id
+    const count = await db.collection('users').countDocuments()
+    const timestamp = Date.now()
+    const id = `user_${String(count + 1).padStart(4, '0')}_${timestamp}`
+
     // 建立新使用者
     const newUser = {
+      id, // 加入自訂 id
       name,
       email,
       password, // 注意：實務上應加密！此範例為簡化
@@ -88,7 +94,7 @@ app.post('/api/register', express.json(), async (req, res) => {
       message: '註冊成功',
       token: 'fake-jwt-token',  // 可改 JWT
       user: {
-        id: result.insertedId.toString(),
+        id: newUser.id,
         name: newUser.name,
         email: newUser.email,
         registered: newUser.registered
