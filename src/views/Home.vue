@@ -89,11 +89,6 @@
             <router-link :to="`/product/${product.id}`" class="card text-center card-product">
               <div class="card-product__img">
                 <img class="card-img" :src="product.image" :alt="product.name" />
-                <ul class="card-product__imgOverlay">
-                  <li><button><i class="ti-search"></i></button></li>
-                  <li><button><i class="ti-shopping-cart"></i></button></li>
-                  <li><button><i class="ti-heart"></i></button></li>
-                </ul>
               </div>
               <div class="card-body">
                 <p>{{ product.category }}</p>

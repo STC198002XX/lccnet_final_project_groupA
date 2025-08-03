@@ -14,15 +14,14 @@
               <li class="nav-item active"><router-link to="/shop" class="nav-link">Shop</router-link></li>
             </ul>
             <ul class="nav-shop">
-              <li class="nav-item"><button><i class="ti-search"></i></button></li>
-              <li class="nav-item">
-                <button @click="showCart = !showCart">
-                  <i class="ti-shopping-cart"></i>
-                  <span class="nav-shop__circle">{{ cart.items.length }}</span>
-                </button>
-              </li>
-              <li class="nav-item" v-if="isHome"><a class="button button-header" href="#" @click.prevent="scrollToTrending">Buy Now</a></li>
-            </ul>
+                <li class="nav-item">
+                  <button @click="handleCartClick">
+                    <i class="ti-shopping-cart"></i>
+                    <span class="nav-shop__circle">{{ cart.items.length }}</span>
+                  </button>
+                </li>
+                <li class="nav-item"><a class="button button-header" href="#" @click.prevent="scrollToTrending">Buy Now</a></li>
+              </ul>
             <!-- 如果已登入 -->
             <ul class="nav navbar-nav menu_nav" v-if="isLoggedIn">
               <li class="nav-item">
@@ -61,12 +60,10 @@
 import { ref } from 'vue'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-// import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
-// const router = useRouter()
 const auth = useAuthStore()
 const cart = useCartStore()
 const showCart = ref(false)
@@ -86,5 +83,14 @@ function scrollToTrending() {
   if (trendingSection.value) {
     trendingSection.value.scrollIntoView({ behavior: 'smooth' })
   }
+}
+
+
+function handleCartClick() {
+  if (!isLoggedIn.value) {
+    alert('請先登入')
+    return
+  }
+  showCart.value = !showCart.value
 }
 </script>
