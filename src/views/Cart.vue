@@ -54,11 +54,17 @@ const cart = useCartStore()
 
 function increase(id) {
   const item = cart.items.find(p => p.id === id)
-  if (item) item.quantity++
+  if (item) {
+    const newQty = item.quantity + 1
+    cart.updateQuantity(id, newQty)  // ✅ 會同步到後端
+  }
 }
 
 function decrease(id) {
   const item = cart.items.find(p => p.id === id)
-  if (item && item.quantity > 1) item.quantity--
+  if (item && item.quantity > 1) {
+    const newQty = item.quantity - 1
+    cart.updateQuantity(id, newQty)  // ✅ 同步到後端
+  }
 }
 </script>

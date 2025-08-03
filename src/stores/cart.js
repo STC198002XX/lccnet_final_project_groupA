@@ -11,9 +11,17 @@ export const useCartStore = defineStore('cart', {
     
    
     // 清空購物車
-    clearCart() {
-      this.items = []
-    },
+    async clearCart() {
+  const auth = useAuthStore()
+  this.items = []
+  if (auth.user?.id) {
+    await fetch(`http://localhost:3000/api/cart/clear`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: auth.user.id })
+    })
+  }
+},
     // 加入商品
   async addItem(product) {
     const existing = this.items.find(p => p.id === product.id)

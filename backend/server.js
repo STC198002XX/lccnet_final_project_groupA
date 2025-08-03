@@ -276,8 +276,13 @@ app.get('/api/products/:id', async (req, res) => {
 // 加入商品至購物車0730
 app.post('/api/cart', async (req, res) => {
   const { user_id, product_id, quantity } = req.body
+const client = new MongoClient(uri)
+await client.connect()
+const db = client.db(dbName)
+const cartCollection = db.collection('carts') // ✅ 新增這三行
 
-  if (!user_id || !product_id || !quantity) {
+
+  if (!user_id || !product_id || quantity === undefined) {
     return res.status(400).json({ error: '缺少必要欄位' })
   }
 
@@ -287,11 +292,14 @@ app.post('/api/cart', async (req, res) => {
     if (existingCart) {
       const itemIndex = existingCart.items.findIndex(item => item.product_id === product_id)
 
-      if (itemIndex !== -1) {
-        // 商品已存在，更新數量
-        existingCart.items[itemIndex].quantity += quantity
-      } else {
-        // 商品不存在，新增商品
+      if (itemIndex !== -1) { //itemIndex !== -1代表已存在
+        // 已存在，更新數量
+        if (quantity === 0) {
+          existingCart.items.splice(itemIndex, 1) // ❌ 數量 0 移除
+        } else {
+          existingCart.items[itemIndex].quantity = quantity
+        }
+      } else if (quantity > 0) {
         existingCart.items.push({ product_id, quantity })
       }
 
@@ -317,7 +325,9 @@ app.post('/api/cart', async (req, res) => {
   } catch (error) {
     console.error('寫入購物車失敗:', error)
     res.status(500).json({ error: '伺服器錯誤' })
-  }
+  }finally {
+  await client.close() // ✅ 加這行
+}
 })
 
 // 登入後載入購物車0730
