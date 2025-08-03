@@ -35,9 +35,11 @@
 import Header from '@/components/Header.vue'   // 新增的
 import { reactive } from 'vue'
 import { useCartStore } from '@/stores/cart'
+import { useAuthStore } from '@/stores/auth' // ✅ 新增
 import axios from 'axios'
 
 const cart = useCartStore()
+const auth = useAuthStore() // ✅ 使用登入資訊
 
 const form = reactive({
   name: '',
@@ -48,12 +50,26 @@ const form = reactive({
 
 async function submitOrder() {
   try {
-    const payload = { ...form, items: cart.items }
+    if (!auth.user?.id) {
+      alert('❌ 尚未登入，請先登入')
+      return
+    }
+
+    const payload = {
+      user_id: auth.user.id, // ✅ 加入使用者 ID
+      ...form,
+      items: cart.items.map(item => ({
+        product_id: item.id,
+        quantity: item.quantity
+      }))
+    }
+
     const res = await axios.post('http://localhost:3000/api/orders', payload)
     alert('✅ 訂單已送出！')
     cart.clearCart()
   } catch (err) {
     alert('❌ 訂單送出失敗，請稍後再試')
+    console.error(err)
   }
 }
 </script>

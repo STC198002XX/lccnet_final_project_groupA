@@ -356,6 +356,100 @@ app.get('/api/cart', async (req, res) => {
   }
 })
 
+// 建立訂單 API
+app.post('/api/orders', async (req, res) => {
+  const { user_id, name, address, phone, note, items } = req.body
+  const client = new MongoClient(uri)
+
+  try {
+    await client.connect()
+    const db = client.db(dbName)
+
+    const parsedUserId = typeof user_id === 'string' ? parseInt(user_id) : user_id
+
+    // 1. 查詢所有商品價格
+    const productIds = items.map(i => i.product_id)
+    const products = await db.collection('products')
+      .find({ product_id: { $in: productIds } })
+      .toArray()
+
+    const productMap = {}
+    products.forEach(p => {
+      productMap[p.product_id] = p
+    })
+
+    // 2. 計算總金額與建立 order_items
+    let amount = 0
+    const order_items = items.map(i => {
+      const product = productMap[i.product_id]
+      const price = product?.price || 0
+      const subtotal = price * i.quantity
+      amount += subtotal
+
+      return {
+        product_id: i.product_id,
+        name: product?.name || '未知商品',
+        price,
+        quantity: i.quantity,
+        subtotal
+      }
+    })
+
+    // 3. 產生 order_id
+    const lastOrder = await db.collection('orders')
+      .find()
+      .sort({ created_at: -1 })
+      .limit(1)
+      .toArray()
+
+    let orderNumber = 1
+    if (lastOrder.length > 0 && lastOrder[0].order_id) {
+      const match = lastOrder[0].order_id.match(/order_(\d+)/)
+      if (match) {
+        orderNumber = parseInt(match[1]) + 1
+      }
+    }
+    const order_id = `order_${String(orderNumber).padStart(4, '0')}`
+
+    // 4. 寫入 orders
+    const order = {
+      order_id,
+      user_id: parsedUserId,
+      name,
+      address,
+      phone,
+      note,
+      amount,
+      status: '處理中',  
+      created_at: new Date()
+    }
+    await db.collection('orders').insertOne(order)
+
+    // 5. 寫入 order_items
+    const itemsToInsert = order_items.map(item => ({
+  order_id,
+  product_id: item.product_id,
+  quantity: item.quantity,
+  price: item.price
+}))
+    await db.collection('order_items').insertMany(itemsToInsert)
+
+    // 6. 清空購物車
+    await db.collection('carts').updateOne(
+      { user_id: parsedUserId },
+      { $set: { items: [], updated_at: new Date() } }
+    )
+
+    res.json({ message: '訂單建立成功', order_id })
+
+  } catch (err) {
+    console.error('❌ 建立訂單失敗:', err)
+    res.status(500).json({ error: '伺服器錯誤' })
+  } finally {
+    await client.close()
+  }
+})
+
 app.listen(port, () => {
   console.log(`✅ API Server running on http://localhost:${port}`)
 })
