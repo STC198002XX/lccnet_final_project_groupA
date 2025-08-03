@@ -45,7 +45,7 @@ app.post('/api/login', express.json(), async (req, res) => {
       token: 'fake-jwt-token',           // 可改為 JWT 實作
       manager: user.manager === true,     // 是否為管理員
       user: {
-        id: user._id,
+        id: user.id,
         name: user.name,
         email: user.email,
         registered: user.registered
@@ -282,10 +282,15 @@ app.post('/api/cart', async (req, res) => {
 // 登入後載入購物車0730
 app.get('/api/cart', async (req, res) => {
   const user_id = parseInt(req.query.user_id)
+  console.log('載入購物車請求收到，user_id:', user_id)
 
   if (!user_id) {
     return res.status(400).json({ error: '缺少 user_id' })
   }
+  const client = new MongoClient(uri)            // ✅ 加在這裡
+  await client.connect()
+  const db = client.db(dbName)
+  const cartCollection = db.collection('carts')  // ✅ 這一行就是 cartCollection 的定義
 
   try {
     const cart = await cartCollection.findOne({ user_id })

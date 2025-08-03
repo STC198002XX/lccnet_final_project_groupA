@@ -85,7 +85,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-
+import { useCartStore } from '@/stores/cart'
 const email = ref('')
 const password = ref('')
 const errorMessage = ref('')
@@ -133,7 +133,10 @@ const handleLogin = async () => {
     localStorage.setItem('userName', data.user.name)
     localStorage.setItem('isManager', JSON.stringify(data.manager))
     localStorage.setItem('user', JSON.stringify(data.user))
-    
+    // 加入購物車狀態
+    const cart = useCartStore()
+    await cart.loadFromServer(data.user.id)
+
     //加入跳轉管理者頁面
     if (data.manager === true) {
       router.push('/manager') 
