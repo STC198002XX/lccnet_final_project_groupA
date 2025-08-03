@@ -108,6 +108,47 @@ app.post('/api/register', express.json(), async (req, res) => {
   }
 })
 
+// 修改密碼
+app.post('/api/reset-password', express.json(), async (req, res) => {
+  const { email, newPassword } = req.body
+
+  // 假設你用 Bearer token 取得使用者 email 或 id
+  // 這邊因為你前端只是用 fake-jwt-token，示範用 email 從 body 取得比較簡單
+  const token = req.headers.authorization?.split(' ')[1]
+  if (!token) {
+    return res.status(401).json({ message: '未授權' })
+  }
+
+  if (!email) {
+    return res.status(400).json({ message: '缺少 email' })
+  }
+
+  const client = new MongoClient(uri)
+
+  try {
+    await client.connect()
+    const db = client.db(dbName)
+
+    const user = await db.collection('users').findOne({ email })
+    if (!user) {
+      return res.status(404).json({ message: '使用者不存在' })
+    }
+
+    // 更新密碼（實務中要 hash）
+    await db.collection('users').updateOne(
+      { email },
+      { $set: { password: newPassword } }
+    )
+
+    res.json({ message: '密碼更新成功' })
+  } catch (err) {
+    console.error('重設密碼錯誤:', err)
+    res.status(500).json({ message: '伺服器錯誤', error: err.message })
+  } finally {
+    await client.close()
+  }
+})
+
 // 取得所有商品 API
 app.get('/api/products', async (req, res) => {
   const client = new MongoClient(uri)

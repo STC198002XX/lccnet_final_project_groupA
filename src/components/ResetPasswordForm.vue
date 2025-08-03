@@ -67,7 +67,7 @@
 <script setup>
 import { ref } from 'vue'
 
-const oldPassword = ref('')
+const email = ref('')
 const newPassword = ref('')
 const confirmPassword = ref('')
 
@@ -78,7 +78,7 @@ const handleSubmit = async () => {
   errorMessage.value = ''
   successMessage.value = ''
 
-  if (!oldPassword.value || !newPassword.value || !confirmPassword.value) {
+  if (!email.value || !newPassword.value || !confirmPassword.value) {
     errorMessage.value = '請填寫所有欄位'
     return
   }
@@ -96,7 +96,8 @@ const handleSubmit = async () => {
         Authorization: `Bearer ${localStorage.getItem('token')}`
       },
       body: JSON.stringify({
-        oldPassword: oldPassword.value,
+        email: email.value,
+        // oldPassword: oldPassword.value,
         newPassword: newPassword.value
       })
     })
@@ -104,7 +105,6 @@ const handleSubmit = async () => {
     if (!res.ok) throw new Error('密碼更新失敗')
 
     successMessage.value = '密碼更新成功'
-    oldPassword.value = ''
     newPassword.value = ''
     confirmPassword.value = ''
   } catch (err) {
