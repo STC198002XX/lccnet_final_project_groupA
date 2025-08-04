@@ -55,6 +55,7 @@ async function submitOrder() {
       return
     }
 
+    // 1. 建立訂單資料
     const payload = {
       user_id: auth.user.id, // ✅ 加入使用者 ID
       ...form,
@@ -64,12 +65,34 @@ async function submitOrder() {
       }))
     }
 
-    const res = await axios.post('http://localhost:3000/api/orders', payload)
-    alert('✅ 訂單已送出！')
+    const orderRes = await axios.post('http://localhost:3000/api/orders', payload)
+    const order = orderRes.data
+    console.log('訂單資料:', order)
+    // 2. 根據訂單內容建立綠界付款表單
+    const ecpayRes = await axios.post('http://localhost:3000/api/ecpay-pay', {
+      amount: order.amount, // 測試金額
+      desc: '訂單說明',
+      itemName: '購物商品項目',
+      orderNo: order.order_id
+    })
+    
+    // 3. 清空購物車
     cart.clearCart()
+
+    // 4. 建立一個 <div> 塞進表單並觸發送出
+    const formDiv = document.createElement('div')
+    formDiv.innerHTML = ecpayRes.data
+    document.body.appendChild(formDiv)
+    formDiv.querySelector('form').submit()
   } catch (err) {
-    alert('❌ 訂單送出失敗，請稍後再試')
+    alert('❌ 訂單送出失敗')
     console.error(err)
-  }
-}
+
+  //   alert('✅ 訂單已送出！')
+  //   cart.clearCart()
+  // } catch (err) {
+  //   alert('❌ 訂單送出失敗，請稍後再試')
+  //   console.error(err)
+  // }
+}}
 </script>
