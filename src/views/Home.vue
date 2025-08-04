@@ -144,7 +144,6 @@
 
 <script setup>
 import { ref} from 'vue'
-// import { ref } from 'vue'
 import { computed } from 'vue'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'

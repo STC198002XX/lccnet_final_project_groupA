@@ -60,7 +60,7 @@
     <BannerProps title="Shop" subtitle="Home - Shop"/>
   
     <!-- 商品與篩選 -->
-    <section class="section-margin--small mb-5">
+    <section ref="trendingSection" class="section-margin--small mb-5">
       <div class="container">
         <div class="row">
           <div class="col-xl-9 col-lg-8 col-md-7">
@@ -109,9 +109,8 @@
 </template>
 
 <script setup>
-import { ref} from 'vue'
+import { ref, computed} from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { computed } from 'vue'
 import { useCartStore } from '@/stores/cart'
 import BannerProps from '../components/BannerProps.vue'
 import ProductGrid from '../components/ProductGrid.vue'

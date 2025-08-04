@@ -4,7 +4,15 @@
     <Header />
     <!-- Banner -->
     <BannerProps title="Product" subtitle="Home - Product"/>
-  
+    <section ref="trendingSection" class="section-margin--small mb-5">
+      <div class="container">
+        <div class="row">
+          <div class="col-xl-9 col-lg-8 col-md-7">
+            ㄚㄚㄚㄚ
+          </div>
+        </div>
+      </div>
+    </section>
     <!-- Product -->
     <div class="product_image_area">
     <div class="container">
@@ -74,21 +82,7 @@
   
   const quantity = ref(1)
   const product = ref({})
-  
-  const increaseQty = () => {
-    quantity.value++
-  }
-  
-  const decreaseQty = () => {
-    if (quantity.value > 1) quantity.value--
-  }
-  
-  const addToCart = () => {
-    if (!product.value) return
-    cart.addItem(product.value, quantity.value)
-    alert('商品已加入購物車！')
-  }
-  
+
   onMounted(async () => {
     const id = route.params.id
     const res = await fetch(`http://localhost:3000/api/products/${id}`)
@@ -103,12 +97,19 @@
     }
   })
 
-  function handleAddToCart() {
+function handleAddToCart() {
   if (!isLoggedIn.value) {
     alert('請先登入')
     return
   }
 
-  addToCart() // 原本的加入購物車邏輯
-  }
+  if (!product.value) return
+
+  cart.addItem({
+    ...product.value,
+    quantity: quantity.value
+  })
+
+  alert('商品已加入購物車！')
+}
 </script>
