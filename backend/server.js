@@ -77,8 +77,9 @@ app.post('/api/register', express.json(), async (req, res) => {
 
     // ✅ 產生唯一的自訂 id
     const count = await db.collection('users').countDocuments()
-    const timestamp = Date.now()
-    const id = `user_${String(count + 1).padStart(4, '0')}_${timestamp}`
+    // const timestamp = Date.now()
+    // const id = `user_${String(count + 1).padStart(4, '0')}_${timestamp}`
+    const id = count + 1 // 簡化版，實務上應用更複雜的 ID 生成邏輯
 
     // 建立新使用者
     const newUser = {
