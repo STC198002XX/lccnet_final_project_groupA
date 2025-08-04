@@ -104,6 +104,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const showPassword = ref(false)
 const togglePasswordVisibility = () => {
@@ -116,6 +117,7 @@ const confirmPassword = ref('')
 
 const errorMessage = ref('')
 const successMessage = ref('')
+const router = useRouter()
 
 const handleSubmit = async () => {
   errorMessage.value = ''
@@ -150,6 +152,9 @@ const handleSubmit = async () => {
     successMessage.value = '密碼更新成功'
     newPassword.value = ''
     confirmPassword.value = ''
+    // 註冊成功後導向登入
+    alert('密碼更新成功') 
+    router.push('/login')
   } catch (err) {
     errorMessage.value = err.message || '發生錯誤'
   }

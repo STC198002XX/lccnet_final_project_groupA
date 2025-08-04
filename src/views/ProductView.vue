@@ -4,15 +4,6 @@
     <Header />
     <!-- Banner -->
     <BannerProps title="Product" subtitle="Home - Product"/>
-    <section ref="trendingSection" class="section-margin--small mb-5">
-      <div class="container">
-        <div class="row">
-          <div class="col-xl-9 col-lg-8 col-md-7">
-            ㄚㄚㄚㄚ
-          </div>
-        </div>
-      </div>
-    </section>
     <!-- Product -->
     <div class="product_image_area">
     <div class="container">
@@ -35,17 +26,7 @@
             <div class="product_count" v-if="product">
               <label for="qty">Quantity:</label>
               <div class="input-group" style="width: 150px;">
-                <!-- <div class="input-group-prepend">
-                  <button @click="decreaseQty" class="btn btn-outline-secondary" type="button">
-                    <i class="ti-angle-left"></i>
-                  </button>
-                </div> -->
                 <input type="number" class="form-control text-center" v-model.number="quantity" min="1">
-                <!-- <div class="input-group-append">
-                  <button @click="increaseQty" class="btn btn-outline-secondary" type="button">
-                    <i class="ti-angle-right"></i>
-                  </button>
-                </div> -->
               </div>
               <button class="button primary-btn" @click="handleAddToCart">Add to Cart</button>
             </div>
@@ -82,13 +63,14 @@
   
   const quantity = ref(1)
   const product = ref({})
+  const showCart = ref(false)
 
   onMounted(async () => {
     const id = route.params.id
     const res = await fetch(`http://localhost:3000/api/products/${id}`)
     const data = await res.json()
     product.value = {
-      product_id: data.product_id,
+      id: data.product_id,
       name: data.name,
       price: data.price,
       image: data.image,
@@ -103,13 +85,20 @@ function handleAddToCart() {
     return
   }
 
-  if (!product.value) return
+  if (!product.value || !quantity.value || quantity.value <= 0) {
+    alert('請輸入有效數量')
+    return
+  }
 
-  cart.addItem({
-    ...product.value,
+  cart.individualaddItem({
+    id: product.value.id,
+    name: product.value.name,
+    price: product.value.price,
+    image: product.value.image,
     quantity: quantity.value
   })
 
   alert('商品已加入購物車！')
+  showCart.value = true
 }
 </script>

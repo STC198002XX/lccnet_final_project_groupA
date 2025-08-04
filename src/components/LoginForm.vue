@@ -26,25 +26,25 @@
         required
       />
     </div>
-    
+
     <div>
-    <label class="block text-base font-medium leading-[2.5rem]">密碼</label>
-    <div class="relative">
-      <input
-        :type="showPassword ? 'text' : 'password'"
-        v-model="password"
-        class="w-full px-4 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-        required
-      />
-      <span
-        @click="togglePasswordVisibility"
-        class="absolute inset-y-0 right-3 flex items-center cursor-pointer text-gray-500 text-base"
-        title="顯示/隱藏密碼"
-      >
-        {{ showPassword ? '🙈' : '👁️' }}
-      </span>
+      <label class="block text-base font-medium leading-[2.5rem]">密碼</label>
+      <div class="relative">
+        <input
+          :type="showPassword ? 'text' : 'password'"
+          v-model="password"
+          class="w-full px-4 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+          required
+        />
+        <span
+          @click="togglePasswordVisibility"
+          class="absolute inset-y-0 right-3 flex items-center cursor-pointer text-gray-500 text-base"
+          title="顯示/隱藏密碼"
+        >
+          {{ showPassword ? '🙈' : '👁️' }}
+        </span>
+      </div>
     </div>
-  </div>
 
 
     <div v-if="errorMessage" class="text-red-500 text-sm">{{ errorMessage }}</div>

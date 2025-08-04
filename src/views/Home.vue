@@ -19,6 +19,7 @@
                   <button @click="handleCartClick">
                     <i class="ti-shopping-cart"></i>
                     <span class="nav-shop__circle">{{ cart.items.length }}</span>
+                    <!-- <span class="nav-shop__circle" v-if="totalQuantity > 0">{{ totalQuantity }}</span> -->
                   </button>
                 </li>
                 <li class="nav-item"><a class="button button-header" href="#" @click.prevent="scrollToTrending">Buy Now</a></li>
@@ -86,19 +87,21 @@
         </div>
         <div class="row">
           <div v-for="product in products" :key="product.id" class="col-md-6 col-lg-4 col-xl-3">
-            <router-link :to="`/product/${product.id}`" class="card text-center card-product">
-              <div class="card-product__img">
-                <img class="card-img" :src="product.image" :alt="product.name" />
-              </div>
+            <div class="card text-center card-product">
+              <router-link :to="`/product/${product.id}`">
+                <div class="card-product__img">
+                  <img class="card-img" :src="product.image" :alt="product.name" />
+                </div>
+              </router-link>
               <div class="card-body">
                 <p>{{ product.category }}</p>
-                <h4 class="card-product__title"><a href="#">{{ product.name }}</a></h4>
+                <h4 class="card-product__title">{{ product.name }}</h4>
                 <p class="card-product__price">${{ product.price }}</p>
                 <button class="btn btn-sm btn-primary mt-2" @click="handleAddToCart(product)">
                   🛒 加入購物車
                 </button>
               </div>
-            </router-link>
+            </div>
           </div>
         </div>
       </div>
@@ -155,6 +158,9 @@ const trendingSection = ref(null)
 
 const isLoggedIn = computed(() => !!auth.token && !!auth.userEmail)
 const displayName = computed(() => auth.userName || auth.userEmail)
+
+const totalQuantity = computed(() => cart.totalQuantity)
+
 
 const products = [
   {

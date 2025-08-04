@@ -44,6 +44,31 @@ export const useCartStore = defineStore('cart', {
       })
     }
   },
+
+  // 加入商品
+  async individualaddItem(product) {
+    const existing = this.items.find(p => p.id === product.id)
+    if (existing) {
+      existing.quantity += product.quantity
+    } else {
+      this.items.push({ ...product, quantity: product.quantity})
+    }
+
+    const auth = useAuthStore()
+    if (auth.user?.id) {
+      await fetch('http://localhost:3000/api/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: auth.user.id,
+          product_id: product.id,
+          quantity: product.quantity
+        })
+      })
+    }
+  },
+
+
 // 更新商品數量
   async updateQuantity(id, quantity) {
     const item = this.items.find(p => p.id === id)
@@ -111,6 +136,9 @@ export const useCartStore = defineStore('cart', {
   getters: {
     // 計算總金額
     totalPrice: (state) =>
-      state.items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+      state.items.reduce((sum, item) => sum + item.price * item.quantity, 0),
+
+    totalQuantity: (state) =>
+    state.items.reduce((sum, item) => sum + item.quantity, 0)
   }
 })
