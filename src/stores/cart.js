@@ -6,46 +6,46 @@ export const useCartStore = defineStore('cart', {
   state: () => ({
     items: [] // 購物車內的商品資料：每筆 { id, name, price, quantity }
   }),
-  persist: true, // ✅ 新增這行，啟用 localStorage 自動保存
   actions: {
     
    
     // 清空購物車
     async clearCart() {
-  const auth = useAuthStore()
-  this.items = []
-  if (auth.user?.id) {
-    await fetch(`http://localhost:3000/api/cart/clear`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: auth.user.id })
-    })
-  }
-},
-    // 加入商品
-  async addItem(product) {
-    const existing = this.items.find(p => p.id === product.id)
-    if (existing) {
-      existing.quantity += 1
-    } else {
-      this.items.push({ ...product, quantity: 1 })
-    }
-
     const auth = useAuthStore()
+    this.items = []
     if (auth.user?.id) {
-      await fetch('http://localhost:3000/api/cart', {
+      await fetch(`http://localhost:3000/api/cart/clear`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: auth.user.id,
-          product_id: product.id,
-          quantity: 1
-        })
+        body: JSON.stringify({ user_id: auth.user.id })
       })
-    }
-  },
+    }},
 
-  // 加入商品
+    // 加入商品
+    async addItem(product) {
+      const existing = this.items.find(p => p.id === product.id)
+      if (existing) {
+        existing.quantity += 1
+      } else {
+        this.items.push({ ...product, quantity: 1 })
+      }
+      console.log('目前購物車：', JSON.stringify(this.items))
+
+      const auth = useAuthStore()
+      if (auth.user?.id) {
+        await fetch('http://localhost:3000/api/cart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: auth.user.id,
+            product_id: product.id,
+            quantity: 1
+          })
+        })
+      }
+    },
+
+  // 個別商品加入
   async individualaddItem(product) {
     const existing = this.items.find(p => p.id === product.id)
     if (existing) {
@@ -53,7 +53,7 @@ export const useCartStore = defineStore('cart', {
     } else {
       this.items.push({ ...product, quantity: product.quantity})
     }
-
+    console.log('目前購物車：', JSON.stringify(this.items))
     const auth = useAuthStore()
     if (auth.user?.id) {
       await fetch('http://localhost:3000/api/cart', {
@@ -102,9 +102,9 @@ export const useCartStore = defineStore('cart', {
           quantity: 0
         })
       })
-    }
-  },
-    // 從伺服器載入購物車資料
+    }},
+
+  // 從伺服器載入購物車資料
   async loadFromServer(user_id) {
     try {
       const res = await fetch(`http://localhost:3000/api/cart?user_id=${user_id}`)
@@ -129,10 +129,8 @@ export const useCartStore = defineStore('cart', {
       console.error('❌ 載入購物車失敗', err)
       this.items = []
     }
-  }
+  }},
 
-
-  },
   getters: {
     // 計算總金額
     totalPrice: (state) =>
@@ -140,5 +138,6 @@ export const useCartStore = defineStore('cart', {
 
     totalQuantity: (state) =>
     state.items.reduce((sum, item) => sum + item.quantity, 0)
-  }
+  },
+  persist: true // ✅ 設定在這裡
 })

@@ -19,7 +19,6 @@
                   <button @click="handleCartClick">
                     <i class="ti-shopping-cart"></i>
                     <span class="nav-shop__circle">{{ cart.items.length }}</span>
-                    <!-- <span class="nav-shop__circle" v-if="totalQuantity > 0">{{ totalQuantity }}</span> -->
                   </button>
                 </li>
                 <li class="nav-item"><a class="button button-header" href="#" @click.prevent="scrollToTrending">Buy Now</a></li>
@@ -158,9 +157,6 @@ const trendingSection = ref(null)
 
 const isLoggedIn = computed(() => !!auth.token && !!auth.userEmail)
 const displayName = computed(() => auth.userName || auth.userEmail)
-
-const totalQuantity = computed(() => cart.totalQuantity)
-
 
 const products = [
   {
