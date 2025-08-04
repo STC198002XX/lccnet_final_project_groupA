@@ -65,10 +65,11 @@ app.post('/api/login', express.json(), async (req, res) => {
 app.post('/api/register', express.json(), async (req, res) => {
   const { name, email, password } = req.body
   const client = new MongoClient(uri)
-
+ const db = client.db(dbName)
+  const cartsCollection = db.collection('carts')
   try {
     await client.connect()
-    const db = client.db(dbName)
+   
     const existingUser = await db.collection('users').findOne({ email })
 
     if (existingUser) {
@@ -77,6 +78,8 @@ app.post('/api/register', express.json(), async (req, res) => {
 
     // ✅ 產生唯一的自訂 id
     const count = await db.collection('users').countDocuments()
+
+    
     // const timestamp = Date.now()
     // const id = `user_${String(count + 1).padStart(4, '0')}_${timestamp}`
     const id = count + 1 // 簡化版，實務上應用更複雜的 ID 生成邏輯
@@ -92,6 +95,14 @@ app.post('/api/register', express.json(), async (req, res) => {
     }
 
     const result = await db.collection('users').insertOne(newUser)
+
+     // ✅ 建立對應購物車
+
+    await cartsCollection.insertOne({
+      user_id: newUser.id,  // 數字 ID
+      items: [],
+      updated_at: new Date()
+    })
 
     res.json({
       message: '註冊成功',
