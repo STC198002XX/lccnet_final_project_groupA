@@ -491,6 +491,8 @@ app.post('/api/ecpay-pay', async (req, res) => {
   if (!amount) {
     return res.status(400).json({ message: '缺少金額 amount' })
   }
+  console.log('🚀 金額 amount:', amount)
+ 
 
   const MerchantTradeDate = new Date().toLocaleString('zh-TW', {
     year: 'numeric',
@@ -506,7 +508,7 @@ app.post('/api/ecpay-pay', async (req, res) => {
   let base_param = {
     MerchantTradeNo: TradeNo, //請帶20碼uid, ex: f0a0d7e9fae1bb72bc93
     MerchantTradeDate,
-    TotalAmount: '1000',
+    TotalAmount: String(amount),
     TradeDesc: '聯成專案1140813測試交易',
     ItemName: '聯成專案1140813測試商品',
     ReturnURL: `${HOST}/return`,
