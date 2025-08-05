@@ -7,10 +7,27 @@ const { Readable } = require('stream')
 require('dotenv').config()
 
 const app = express()
-const port = 3000
+const port = process.env.PORT || 3000 //上雲則port不能寫死為3000
 const uri = process.env.MONGO_URI
 const dbName = 'aroma'
 
+// ⚠️ 開發階段：允許本機前端（如 Vite、Vue CLI）來上前端上Heroku要改  const whitelist = ['https://你的前端網域.herokuapp.com']
+const whitelist = [
+  'http://localhost:5173',  // Vite 預設 port
+  'http://localhost:8080',  // Vue CLI 預設 port
+]
+
+const corsOptions = {
+  origin(origin, callback) {
+    // 沒有 origin（如 Postman）也允許
+    if (!origin || whitelist.includes(origin)) {
+      callback(null, true)
+    } else {
+      callback(new Error('不被允許的 CORS 來源：' + origin))
+    }
+  },
+  credentials: true // 若前端 axios 有 withCredentials，要開啟
+}
 
 
 
@@ -19,7 +36,7 @@ cloudinary.config({
   api_key: process.env.CLOUD_API_KEY,
   api_secret: process.env.CLOUD_API_SECRET,
 })
-app.use(cors())
+app.use(cors(corsOptions)) // 允許跨域
 app.use(express.json())
 
 const storage = multer.memoryStorage()
