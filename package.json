@@ -5,7 +5,8 @@
   "scripts": {
     "start": "serve -s dist",
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build"
+    "build": "vue-cli-service build",
+  "heroku-postbuild": "cp .env .env.local && npm run build"
   },
   "dependencies": {
     "axios": "^1.10.0",
