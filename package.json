@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "start": "serve -s dist",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build"
   },
@@ -12,6 +13,7 @@
     "dotenv": "^17.2.1",
     "pinia": "^3.0.3",
     "pinia-plugin-persistedstate": "^4.4.1",
+    "serve": "^14.2.4",
     "vue": "^3.2.13",
     "vue-router": "^4.0.3"
   },
