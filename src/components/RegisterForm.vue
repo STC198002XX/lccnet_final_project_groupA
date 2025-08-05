@@ -149,7 +149,8 @@ const handleRegister = async () => {
   }
 
   try {
-    const res = await fetch('http://localhost:3000/api/register', {
+    const API_URL = process.env.VUE_APP_API
+    const res = await fetch(`${API_URL}/api/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

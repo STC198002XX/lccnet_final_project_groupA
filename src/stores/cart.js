@@ -1,7 +1,7 @@
 // src/stores/cart.js
 import { defineStore } from 'pinia'
 import { useAuthStore } from './auth'
-
+const API_URL = process.env.VUE_APP_API
 export const useCartStore = defineStore('cart', {
   state: () => ({
     items: [] // 購物車內的商品資料：每筆 { id, name, price, quantity }
@@ -14,7 +14,7 @@ export const useCartStore = defineStore('cart', {
     const auth = useAuthStore()
     this.items = []
     if (auth.user?.id) {
-      await fetch(`http://localhost:3000/api/cart/clear`, {
+      await fetch(`${API_URL}/api/cart/clear`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: auth.user.id })
@@ -33,7 +33,7 @@ export const useCartStore = defineStore('cart', {
 
       const auth = useAuthStore()
       if (auth.user?.id) {
-        await fetch('http://localhost:3000/api/cart', {
+        await fetch('${API_URL}/api/cart', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -56,7 +56,7 @@ export const useCartStore = defineStore('cart', {
     console.log('目前購物車：', JSON.stringify(this.items))
     const auth = useAuthStore()
     if (auth.user?.id) {
-      await fetch('http://localhost:3000/api/cart', {
+      await fetch('${API_URL}/api/cart', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -76,7 +76,7 @@ export const useCartStore = defineStore('cart', {
 
     const auth = useAuthStore()
     if (auth.user?.id) {
-      await fetch('http://localhost:3000/api/cart', {
+      await fetch('${API_URL}/api/cart', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -93,7 +93,7 @@ export const useCartStore = defineStore('cart', {
 
     const auth = useAuthStore()
     if (auth.user?.id) {
-      await fetch('http://localhost:3000/api/cart', {
+      await fetch('${API_URL}/api/cart', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -107,10 +107,10 @@ export const useCartStore = defineStore('cart', {
   // 從伺服器載入購物車資料
   async loadFromServer(user_id) {
     try {
-      const res = await fetch(`http://localhost:3000/api/cart?user_id=${user_id}`)
+      const res = await fetch(`${API_URL}/api/cart?user_id=${user_id}`)
       const cartData = await res.json()
 
-    const productRes = await fetch('http://localhost:3000/api/products')
+    const productRes = await fetch('${API_URL}/api/products')
     const products = await productRes.json()
 
     this.items = Array.isArray(cartData.items)

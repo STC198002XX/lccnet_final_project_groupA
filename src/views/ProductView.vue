@@ -54,7 +54,7 @@
   import { useCartStore } from '@/stores/cart'
   import Header from '@/components/Header.vue'
   import BannerProps from '../components/BannerProps.vue'
-  
+  const API_URL = process.env.VUE_APP_API
   const auth = useAuthStore()
   const isLoggedIn = computed(() => !!auth.token && !!auth.userEmail)
   
@@ -67,7 +67,7 @@
 
   onMounted(async () => {
     const id = route.params.id
-    const res = await fetch(`http://localhost:3000/api/products/${id}`)
+    const res = await fetch(`${API_URL}/api/products/${id}`)
     const data = await res.json()
     product.value = {
       id: data.product_id,

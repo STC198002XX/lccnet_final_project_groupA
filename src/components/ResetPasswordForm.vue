@@ -134,7 +134,8 @@ const handleSubmit = async () => {
   }
 
   try {
-    const res = await fetch('http://localhost:3000/api/reset-password', {
+    const API_URL = process.env.VUE_APP_API
+    const res = await fetch(`${API_URL}/api/reset-password`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

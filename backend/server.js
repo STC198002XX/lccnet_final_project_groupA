@@ -482,41 +482,7 @@ app.post('/api/orders', async (req, res) => {
   }
 })
 
-// 取得特定會員的購買紀錄
-app.get('/api/orders/:user_id', async (req, res) => {
-  const user_id = parseInt(req.params.user_id)
-  const client = new MongoClient(uri)
 
-  try {
-    await client.connect()
-    const db = client.db(dbName)
-
-    // 找到該會員的所有訂單
-    const orders = await db.collection('orders')
-      .find({ user_id })
-      .sort({ created_at: -1 })
-      .toArray()
-
-    // 找到所有這些訂單的明細
-    const orderIds = orders.map(o => o.order_id)
-    const orderItems = await db.collection('order_items')
-      .find({ order_id: { $in: orderIds } })
-      .toArray()
-
-    // 把 order_items 塞回 orders
-    const ordersWithItems = orders.map(order => ({
-      ...order,
-      items: orderItems.filter(item => item.order_id === order.order_id)
-    }))
-
-    res.json(ordersWithItems)
-  } catch (err) {
-    console.error('❌ 取得購買紀錄失敗:', err)
-    res.status(500).json({ error: '伺服器錯誤' })
-  } finally {
-    await client.close()
-  }
-})
 
 // 綠界提供的 SDK
 const ecpay_payment = require('ecpay_aio_nodejs');

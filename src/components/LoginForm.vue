@@ -81,7 +81,7 @@ const password = ref('')
 const errorMessage = ref('')
 const router = useRouter()
 const auth = useAuthStore()
-
+const API_URL = process.env.VUE_APP_API
 const showPassword = ref(false)
 const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value
@@ -94,7 +94,7 @@ const handleLogin = async () => {
   }
 
   try {
-    const res = await fetch('http://localhost:3000/api/login', {
+    const res = await fetch(`${API_URL}/api/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: email.value, password: password.value })

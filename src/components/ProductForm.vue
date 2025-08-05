@@ -34,7 +34,7 @@
 
 <script setup>
 import { ref } from 'vue'
-
+const API_URL = process.env.VUE_APP_API
 
 const newProduct = ref({
   name: '',
@@ -56,7 +56,7 @@ async function addProduct() {
     formData.append(key, newProduct.value[key])
   }
   formData.append('image', imageFile.value)
-  const res = await fetch('http://localhost:3000/api/products', {
+  const res = await fetch(`${API_URL}/api/products`, {
     method: 'POST',
     body: formData
   })

@@ -77,10 +77,10 @@ const handleLogout = () => {
 
 const user = computed(() => auth.user)
 const token = computed(() => auth.token)
-
+const API_URL = process.env.VUE_APP_API
 onMounted(async () => {
   if (auth.user?.id) {
-    const res = await fetch(`http://localhost:3000/api/orders/${auth.user.id}`)
+    const res = await fetch(`${API_URL}/api/orders/${auth.user.id}`)
     orders.value = await res.json()
   }
 })

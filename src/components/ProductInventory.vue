@@ -35,7 +35,8 @@ import { ref,onMounted } from 'vue'
 const products = ref([])
 
 onMounted(async () => {
-  const res = await fetch('http://localhost:3000/api/products')
+  const API_URL = process.env.VUE_APP_API
+  const res = await fetch(`${API_URL}/api/products`)
   products.value = await res.json()
 })
 </script>

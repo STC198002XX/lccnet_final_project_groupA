@@ -37,7 +37,7 @@ import { reactive } from 'vue'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth' // ✅ 新增
 import axios from 'axios'
-
+const API_URL = process.env.VUE_APP_API
 const cart = useCartStore()
 const auth = useAuthStore() // ✅ 使用登入資訊
 
@@ -65,11 +65,11 @@ async function submitOrder() {
       }))
     }
 
-    const orderRes = await axios.post('http://localhost:3000/api/orders', payload)
+    const orderRes = await axios.post(`${API_URL}/api/orders`, payload)
     const order = orderRes.data
     console.log('訂單資料:', order)
     // 2. 根據訂單內容建立綠界付款表單
-    const ecpayRes = await axios.post('http://localhost:3000/api/ecpay-pay', {
+    const ecpayRes = await axios.post(`${API_URL}/api/ecpay-pay`, {
       amount: order.amount, // 測試金額
       desc: '訂單說明',
       itemName: '購物商品項目',

@@ -76,6 +76,7 @@
 </template>
   
 <script>
+
   export default {
     name: 'ProductGrid',
     data() {
@@ -125,7 +126,8 @@
   },
   
     mounted() {
-      fetch('http://localhost:3000/api/products')
+      const API_URL = process.env.VUE_APP_API
+      fetch(`${API_URL}/api/products`)
         .then(response => {
           if (!response.ok) {
             throw new Error('Network response was not ok')
