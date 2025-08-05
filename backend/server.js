@@ -8,7 +8,7 @@ require('dotenv').config()
 
 const app = express()
 const port = 3000
-const uri = 'mongodb://localhost:27017'
+const uri = process.env.MONGO_URI
 const dbName = 'aroma'
 
 
@@ -230,7 +230,7 @@ app.post('/api/products', upload.single('image'), async (req, res) => {
 
     // 上傳圖片到 Cloudinary
     const streamUpload = (buffer) => {
-      return new Promise((resolve, reject) => {git
+      return new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
           {
             public_id: `products/${product_id}`, // ✅ 每次都唯一
@@ -261,6 +261,7 @@ app.post('/api/products', upload.single('image'), async (req, res) => {
     await db.collection('products').insertOne(product)
     res.json({ message: '商品已成功上架' })
   } catch (err) {
+    console.error(err)
     res.status(500).json({ message: '伺服器錯誤1040729', error: err.message })
   } finally {
     await client.close()
@@ -595,11 +596,10 @@ app.post('/return', async (req, res) => {
   res.send('1|OK');
 });
 
-//用戶交易完成後的轉址
+//用戶交易完成後的轉址，付款成功頁面
 app.get('/clientReturn', (req, res) => {
-  console.log('clientReturn:', req.body, req.query);
-  res.render('return', { query: req.query });
-});
+  res.send('<h1>✅ 付款完成，謝謝您的訂購！</h1>')
+})
 
 
 app.listen(port, () => {
