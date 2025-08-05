@@ -15,6 +15,7 @@ const dbName = 'aroma'
 const whitelist = [
   'http://localhost:5173',  // Vite 預設 port
   'http://localhost:8080',  // Vue CLI 預設 port
+  'https://frontend1140813groupa-42a3fe6acaab.herokuapp.com', // Heroku 前端網址
 ]
 
 const corsOptions = {
