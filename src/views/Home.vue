@@ -132,7 +132,13 @@
         </div>
       </div>
     </div>
-
+<!-- Google Map -->
+    <section ref="trendingSection" class="section-margin calc-60px">
+      <div class="container">
+        <h2>Location</h2>
+        <GoogleMap :center="{ lat: 25.092963, lng: 121.525757 }" :zoom="16" markerTitle="聯成電腦-士林"/>
+      </div>
+    </section>
     <!-- Footer 區塊 -->
     <footer class="footer mt-5">
       <div class="footer-area">
@@ -149,7 +155,7 @@ import { ref} from 'vue'
 import { computed } from 'vue'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
-
+import GoogleMap from '@/components/GoogleMap.vue'
 const auth = useAuthStore()
 const cart = useCartStore()
 const showCart = ref(false)
