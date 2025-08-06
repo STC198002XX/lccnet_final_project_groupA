@@ -33,7 +33,7 @@ export const useCartStore = defineStore('cart', {
 
       const auth = useAuthStore()
       if (auth.user?.id) {
-        await fetch('${API_URL}/api/cart', {
+        await fetch(`${API_URL}/api/cart`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -56,7 +56,7 @@ export const useCartStore = defineStore('cart', {
     console.log('目前購物車：', JSON.stringify(this.items))
     const auth = useAuthStore()
     if (auth.user?.id) {
-      await fetch('${API_URL}/api/cart', {
+      await fetch(`${API_URL}/api/cart`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -76,7 +76,7 @@ export const useCartStore = defineStore('cart', {
 
     const auth = useAuthStore()
     if (auth.user?.id) {
-      await fetch('${API_URL}/api/cart', {
+      await fetch(`${API_URL}/api/cart`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -93,7 +93,7 @@ export const useCartStore = defineStore('cart', {
 
     const auth = useAuthStore()
     if (auth.user?.id) {
-      await fetch('${API_URL}/api/cart', {
+      await fetch(`${API_URL}/api/cart`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
