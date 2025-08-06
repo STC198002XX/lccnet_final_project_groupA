@@ -10,7 +10,7 @@
           <th>姓名</th>
           <th>Email</th>
           <th>註冊時間</th>
-          <th>頭像</th>
+          <!-- <th>頭像</th> -->
         </tr>
       </thead>
       <tbody>
@@ -19,7 +19,7 @@
           <td>{{ user.name }}</td>
           <td>{{ user.email }}</td>
           <td>{{ user.registered }}</td>
-          <td><img src="aroma/img/r1.jpg" alt="avatar" style="height: 50px;"></td>
+          <!-- <td><img src="aroma/img/r1.jpg" alt="avatar" style="height: 50px;"></td> -->
         </tr>
         <tr v-else>
           <td colspan="5">尚未登入</td>
