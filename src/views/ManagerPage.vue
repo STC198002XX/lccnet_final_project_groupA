@@ -6,7 +6,7 @@
           <a class="navbar-brand logo_h"><router-link to="/"><img src="/aroma/img/logo.png" alt=""></router-link></a>
           <div class="collapse navbar-collapse offset" id="navbarSupportedContent">
             <ul class="nav navbar-nav menu_nav ml-auto mr-auto">
-              <h4 class="container mt-2">登入</h4>
+              <h4 class="container mt-2">管理系統</h4>
             </ul>
           </div>
         </div>
@@ -43,6 +43,8 @@ import MemberOrdersTable from '@/components/MemberOrdersTable.vue'
 import ProductInventory from '@/components/ProductInventory.vue' // ✅ 新增元件
 
 import ProductForm from '@/components/ProductForm.vue'       // ✅ 元件加回去
+import { useRouter, onBeforeRouteLeave } from 'vue-router'
+const router = useRouter()
 // import AdminForm from '@/components/AdminForm.vue'           // ❌ 註解
 
 const currentTab = ref('memberOrders')
@@ -61,5 +63,24 @@ const currentTabComponent = computed(() => {
     case 'addProduct': return ProductForm
     // case 'admins': return AdminForm
   }
+})
+
+import { useAuthStore } from '@/stores/auth'
+
+const auth = useAuthStore()
+
+onBeforeRouteLeave((to, from, next) => {
+  console.log('⚠️ 離開管理者頁面，自動登出')
+
+  // ✅ 安全登出（先執行登出動作）
+  auth.logout()
+
+  // ✅ 延遲導向首頁，避免 router.push 和 next() 衝突
+  setTimeout(() => {
+    router.push('/')  // 轉回首頁
+  }, 10)
+
+  // ✅ 仍然呼叫 next() 讓路由繼續（否則卡住）
+  next()
 })
 </script>
