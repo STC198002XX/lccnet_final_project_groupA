@@ -39,6 +39,7 @@ cloudinary.config({
 })
 app.use(cors(corsOptions)) // 允許跨域
 app.use(express.json())
+app.use(express.urlencoded({ extended: true }))  // ⬅️ 加這行
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage })  // ← 這一行要加上
@@ -437,12 +438,12 @@ app.post('/api/orders', async (req, res) => {
 
     let orderNumber = 1
     if (lastOrder.length > 0 && lastOrder[0].order_id) {
-      const match = lastOrder[0].order_id.match(/order_(\d+)/)
+      const match = lastOrder[0].order_id.match(/order(\d+)/)
       if (match) {
         orderNumber = parseInt(match[1]) + 1
       }
     }
-    const order_id = `order_${String(orderNumber).padStart(4, '0')}`
+    const order_id = `order${String(orderNumber).padStart(4, '0')}`  //原本是order_0000,改成 order0000,以符合綠界orderNo 格式
 
     // 4. 寫入 orders
     const order = {
@@ -552,12 +553,13 @@ app.post('/api/ecpay-pay', async (req, res) => {
   console.log('🚀 Received pay request (測試寫死)')
   // SDK 提供的範例，參數設定
   // https://github.com/ECPay/ECPayAIO_Node.js/blob/master/ECPAY_Payment_node_js/conf/config-example.js
-    const { amount } = req.body
-  if (!amount) {
-    return res.status(400).json({ message: '缺少金額 amount' })
+    const { amount, orderNo } = req.body
+
+  if (!amount || !orderNo) {
+    return res.status(400).json({ message: '缺少金額或訂單編號' })
   }
   console.log('🚀 金額 amount:', amount)
- 
+ console.log('🚀 訂單編號 orderNo:', orderNo)
 
   const MerchantTradeDate = new Date().toLocaleString('zh-TW', {
     year: 'numeric',
@@ -569,9 +571,9 @@ app.post('/api/ecpay-pay', async (req, res) => {
     hour12: false,
     timeZone: 'UTC',
   });
-  TradeNo = 'test' + new Date().getTime();
+  // TradeNo = 'test' + new Date().getTime();
   let base_param = {
-    MerchantTradeNo: TradeNo, //請帶20碼uid, ex: f0a0d7e9fae1bb72bc93
+    MerchantTradeNo: orderNo, //請帶20碼uid, ex: f0a0d7e9fae1bb72bc93
     MerchantTradeDate,
     TotalAmount: String(amount),
     TradeDesc: '聯成專案1140813測試交易',
@@ -595,8 +597,11 @@ app.post('/api/ecpay-pay', async (req, res) => {
 //後端接收綠界回傳的資料
 app.post('/return', async (req, res) => {
   console.log('req.body:', req.body);
+  if (!req.body || typeof req.body !== 'object') {
+    return res.status(400).send('Invalid body')
+  }
 
-  const { CheckMacValue } = req.body;
+  const { CheckMacValue, RtnCode, MerchantTradeNo, PaymentType, TradeNo } = req.body
   const data = { ...req.body };
   delete data.CheckMacValue; // 此段不驗證
 
@@ -609,6 +614,38 @@ app.post('/return', async (req, res) => {
     CheckMacValue,
     checkValue,
   );
+
+    // ✅ 臨時連線（非共用池）
+  const client = new MongoClient(uri)
+
+  // ✅ 檢查驗證通過且交易成功
+  try {
+    await client.connect()
+    const db = client.db(dbName)
+
+    if (RtnCode === '1' && CheckMacValue === checkValue) {
+      const result = await db.collection('orders').updateOne(
+        { order_id: MerchantTradeNo },
+        {
+          $set: {
+            status: '已付款',
+            paid_at: new Date(),
+            payment_type: PaymentType,
+            payment_no: TradeNo
+          }
+        }
+      )
+
+      console.log(`✅ 訂單 ${MerchantTradeNo} 狀態更新為「已付款」`)
+    } else {
+      console.warn(`⚠️ 訂單 ${MerchantTradeNo} 驗證失敗或非成功交易`)
+    }
+
+  } catch (err) {
+    console.error(`❌ 更新訂單 ${MerchantTradeNo} 時發生錯誤:`, err)
+  } finally {
+    await client.close()
+  }
 
  // 交易成功後，需要回傳 1|OK 給綠界
   res.send('1|OK');
