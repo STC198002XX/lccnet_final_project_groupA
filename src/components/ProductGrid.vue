@@ -23,7 +23,7 @@
     </div>
 
     <!-- 商品卡片 -->
-    <div class="row">
+    <div class="row justify-content-center">
       <div
         class="col-md-6 col-lg-4"
         v-for="product in paginatedProducts"
@@ -143,3 +143,11 @@
     }
   }
 </script>
+
+<style scoped>
+  @media (max-width: 576px) {
+    .card-product {
+      margin-bottom: 10px;
+    }
+  }
+</style>

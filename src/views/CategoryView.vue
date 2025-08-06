@@ -62,7 +62,7 @@
     <!-- 商品與篩選 -->
     <section ref="trendingSection" class="section-margin--small mb-5">
       <div class="container">
-        <div class="row">
+        <div class="row justify-content-center">
           <div class="col-xl-9 col-lg-8 col-md-7">
             <ProductGrid />
           </div>
