@@ -110,7 +110,7 @@ export const useCartStore = defineStore('cart', {
       const res = await fetch(`${API_URL}/api/cart?user_id=${user_id}`)
       const cartData = await res.json()
 
-    const productRes = await fetch('${API_URL}/api/products')
+    const productRes = await fetch(`${API_URL}/api/products`)
     const products = await productRes.json()
 
     this.items = Array.isArray(cartData.items)
