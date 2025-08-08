@@ -44,15 +44,43 @@ app.use(express.urlencoded({ extended: true }))  // ⬅️ 加這行
 const storage = multer.memoryStorage()
 const upload = multer({ storage })  // ← 這一行要加上
 
+// ===== ★★★ 單例 MongoClient + 連線池 ★★★
+const client = new MongoClient(uri, {
+  maxPoolSize: 15,              // 依流量調整 10~30
+  minPoolSize: 0,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+})
+
+async function initDb() {
+  await client.connect()
+  app.locals.db = client.db(dbName)
+  console.log('✅ Mongo connected. Pool ready.')
+}
+initDb().then(() => {
+    app.listen(port, () => {
+       console.log(`✅ API Server running on http://localhost:${port}`)
+    })
+   }).catch(err => {
+  console.error('❌ Mongo connect failed:', err)
+  process.exit(1)
+})
+
+// 優雅關閉（Heroku/Docker）
+async function shutdown() {
+  try { await client.close(); console.log('🛑 Mongo closed.') }
+  finally { process.exit(0) }
+}
+process.on('SIGTERM', shutdown)
+process.on('SIGINT', shutdown)
+
 // 登入 API 只給 login 用的 json middleware
 app.post('/api/login', express.json(), async (req, res) => {
   const { email, password } = req.body
-  const client = new MongoClient(uri)
+  const db = req.app.locals.db // 從 app.locals 取得 db 實例
 
   try {
     console.log('登入請求收到:', email, password)
-    await client.connect()
-    const db = client.db(dbName)
     const user = await db.collection('users').findOne({ email })
 
     console.log('找到使用者:', user)
@@ -75,21 +103,16 @@ app.post('/api/login', express.json(), async (req, res) => {
   } catch (err) {
     console.error('❌ 登入發生錯誤:', err)
     res.status(500).json({ message: '伺服器錯誤', error: err.message })
-  } finally {
-    await client.close()
-  }
+  } 
 })
 
 // 註冊 API
 app.post('/api/register', express.json(), async (req, res) => {
   const { name, email, password } = req.body
-  const client = new MongoClient(uri)
- const db = client.db(dbName)
+  const db = req.app.locals.db
   const cartsCollection = db.collection('carts')
   try {
-    await client.connect()
-   
-    const existingUser = await db.collection('users').findOne({ email })
+       const existingUser = await db.collection('users').findOne({ email })
 
     if (existingUser) {
       return res.status(400).json({ message: '此 Email 已被註冊' })
@@ -136,9 +159,7 @@ app.post('/api/register', express.json(), async (req, res) => {
   } catch (err) {
     console.error('❌ 註冊錯誤:', err)
     res.status(500).json({ message: '伺服器錯誤', error: err.message })
-  } finally {
-    await client.close()
-  }
+  } 
 })
 
 // 修改密碼
@@ -156,11 +177,9 @@ app.post('/api/reset-password', express.json(), async (req, res) => {
     return res.status(400).json({ message: '缺少 email' })
   }
 
-  const client = new MongoClient(uri)
+ const db = req.app.locals.db
 
   try {
-    await client.connect()
-    const db = client.db(dbName)
 
     const user = await db.collection('users').findOne({ email })
     if (!user) {
@@ -177,32 +196,24 @@ app.post('/api/reset-password', express.json(), async (req, res) => {
   } catch (err) {
     console.error('重設密碼錯誤:', err)
     res.status(500).json({ message: '伺服器錯誤', error: err.message })
-  } finally {
-    await client.close()
-  }
+  } 
 })
 
 // 取得所有商品 API
 app.get('/api/products', async (req, res) => {
-  const client = new MongoClient(uri)
+  const db = req.app.locals.db
   try {
-    await client.connect()
-    const db = client.db(dbName)
     const products = await db.collection('products').find().toArray()
     res.json(products)
   } catch (err) {
     res.status(500).json({ message: '伺服器錯誤', error: err.message })
-  } finally {
-    await client.close()
-  }
+  } 
 })
 
 // 取得一般會員（非管理員）資料 + 真實 orders
 app.get('/api/users', async (req, res) => {
-  const client = new MongoClient(uri)
+  const db = req.app.locals.db
   try {
-    await client.connect()
-    const db = client.db(dbName)
     const users = await db.collection('users')
       .find({ manager: false }, { projection: { password: 0 } })
       .toArray()
@@ -224,18 +235,14 @@ app.get('/api/users', async (req, res) => {
     res.json(userMap)
   } catch (err) {
     res.status(500).json({ message: '伺服器錯誤', error: err.message })
-  } finally {
-    await client.close()
-  }
+  } 
 })
 
 
 // ✅ 上傳商品 API（包含圖片存 Cloudinary）
 app.post('/api/products', upload.single('image'), async (req, res) => {
-  const client = new MongoClient(uri)
+  const db = req.app.locals.db
   try {
-    await client.connect()
-    const db = client.db(dbName)
     const { name, category, price, stock } = req.body
 
     // 自動產生 product_id
@@ -282,25 +289,20 @@ app.post('/api/products', upload.single('image'), async (req, res) => {
   } catch (err) {
     console.error(err)
     res.status(500).json({ message: '伺服器錯誤1040729', error: err.message })
-  } finally {
-    await client.close()
-  }
+  } 
 })
 
 // 取得特定產品0730
 app.get('/api/products/:id', async (req, res) => {
   const { id } = req.params
   try {
-    const client = new MongoClient(uri)
-    await client.connect()
-    const db = client.db(dbName)
+    const db = req.app.locals.db
     const product = await db.collection('products').findOne({ product_id: id })
     if (!product) {
       res.status(404).json({ message: 'Product not found' })
     } else {
       res.json(product)
     }
-    await client.close()
   } catch (error) {
     console.error(error)
     res.status(500).json({ message: 'Server error' })
@@ -310,9 +312,7 @@ app.get('/api/products/:id', async (req, res) => {
 // 加入商品至購物車0730
 app.post('/api/cart', async (req, res) => {
   const { user_id, product_id, quantity } = req.body
-const client = new MongoClient(uri)
-await client.connect()
-const db = client.db(dbName)
+const db = req.app.locals.db
 const cartCollection = db.collection('carts') // ✅ 新增這三行
 
 
@@ -359,9 +359,7 @@ const cartCollection = db.collection('carts') // ✅ 新增這三行
   } catch (error) {
     console.error('寫入購物車失敗:', error)
     res.status(500).json({ error: '伺服器錯誤' })
-  }finally {
-  await client.close() // ✅ 加這行
-}
+  }
 })
 
 // 登入後載入購物車0730
@@ -372,9 +370,7 @@ app.get('/api/cart', async (req, res) => {
   if (!user_id) {
     return res.status(400).json({ error: '缺少 user_id' })
   }
-  const client = new MongoClient(uri)            // ✅ 加在這裡
-  await client.connect()
-  const db = client.db(dbName)
+  const db = req.app.locals.db
   const cartCollection = db.collection('carts')  // ✅ 這一行就是 cartCollection 的定義
 
   try {
@@ -393,12 +389,9 @@ app.get('/api/cart', async (req, res) => {
 // 建立訂單 API
 app.post('/api/orders', async (req, res) => {
   const { user_id, name, address, phone, note, items } = req.body
-  const client = new MongoClient(uri)
+  const db = req.app.locals.db
 
   try {
-    await client.connect()
-    const db = client.db(dbName)
-
     const parsedUserId = typeof user_id === 'string' ? parseInt(user_id) : user_id
 
     // 1. 查詢所有商品價格
@@ -479,19 +472,15 @@ app.post('/api/orders', async (req, res) => {
   } catch (err) {
     console.error('❌ 建立訂單失敗:', err)
     res.status(500).json({ error: '伺服器錯誤' })
-  } finally {
-    await client.close()
-  }
+  } 
 })
 
 // 取得特定會員的購買紀錄
 app.get('/api/orders/:user_id', async (req, res) => {
   const user_id = parseInt(req.params.user_id)
-  const client = new MongoClient(uri)
+  const db = req.app.locals.db
 
   try {
-    await client.connect()
-    const db = client.db(dbName)
 
     // 找到該會員的所有訂單
     const orders = await db.collection('orders')
@@ -515,9 +504,7 @@ app.get('/api/orders/:user_id', async (req, res) => {
   } catch (err) {
     console.error('❌ 取得購買紀錄失敗:', err)
     res.status(500).json({ error: '伺服器錯誤' })
-  } finally {
-    await client.close()
-  }
+  } 
 })
 
 // 綠界提供的 SDK
@@ -615,14 +602,11 @@ app.post('/return', async (req, res) => {
     checkValue,
   );
 
-    // ✅ 臨時連線（非共用池）
-  const client = new MongoClient(uri)
+    
+  const db = req.app.locals.db
 
   // ✅ 檢查驗證通過且交易成功
   try {
-    await client.connect()
-    const db = client.db(dbName)
-
     if (RtnCode === '1' && CheckMacValue === checkValue) {
       const result = await db.collection('orders').updateOne(
         { order_id: MerchantTradeNo },
@@ -643,9 +627,7 @@ app.post('/return', async (req, res) => {
 
   } catch (err) {
     console.error(`❌ 更新訂單 ${MerchantTradeNo} 時發生錯誤:`, err)
-  } finally {
-    await client.close()
-  }
+  } 
 
  // 交易成功後，需要回傳 1|OK 給綠界
   res.send('1|OK');
@@ -657,6 +639,6 @@ app.get('/clientReturn', (req, res) => {
 })
 
 
-app.listen(port, () => {
-  console.log(`✅ API Server running on http://localhost:${port}`)
-})
+// app.listen(port, () => {
+//   console.log(`✅ API Server running on http://localhost:${port}`)
+// })
