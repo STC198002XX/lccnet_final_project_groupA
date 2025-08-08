@@ -3,10 +3,12 @@
     <div class="main_menu">
       <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container">
-          <a class="navbar-brand logo_h"><router-link to="/"><img src="/aroma/img/logo.png" alt=""></router-link></a>
+          <!-- <a class="navbar-brand logo_h"><router-link to="/"><img src="/aroma/img/logo.png" alt=""></router-link></a> -->
+          <img class="navbar-brand logo_h" src="/aroma/img/logo.png"  alt="">
+          <button class="btn btn-danger mb-3" @click="handleLogout">登出</button>
           <div class="collapse navbar-collapse offset" id="navbarSupportedContent">
             <ul class="nav navbar-nav menu_nav ml-auto mr-auto">
-              <h4 class="container mt-2">管理系統</h4>
+              <h4 class="container mt-2">您好，{{ displayName }}</h4>
             </ul>
           </div>
         </div>
@@ -68,6 +70,15 @@ const currentTabComponent = computed(() => {
 import { useAuthStore } from '@/stores/auth'
 
 const auth = useAuthStore()
+
+const displayName = computed(() => auth.userName || auth.userEmail)
+// ✅ 安全登出
+// ✅ 這裡的登出會清除 auth store 的使用者資料
+const handleLogout = () => {
+  alert('登出成功')
+  auth.logout()
+  router.push('/')
+}
 
 onBeforeRouteLeave((to, from, next) => {
   console.log('⚠️ 離開管理者頁面，自動登出')
