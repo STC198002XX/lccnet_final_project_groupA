@@ -474,6 +474,28 @@ app.post('/api/orders', async (req, res) => {
     res.status(500).json({ error: '伺服器錯誤' })
   } 
 })
+// 清空購物車 API
+app.post('/api/cart/clear', express.json(), async (req, res) => {
+  const { user_id } = req.body
+   const db = req.app.locals.db
+
+  try {
+    // 清空 items，並更新時間
+    const result = await db.collection('carts').updateOne(
+      { user_id:  Number(user_id) },
+      { $set: { items: [], updated_at: new Date() } }
+    )
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ message: '購物車不存在' })
+    }
+
+    res.json({ message: '購物車已清空' })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: '伺服器錯誤' })
+  } 
+})
 
 // 取得特定會員的購買紀錄
 app.get('/api/orders/:user_id', async (req, res) => {
