@@ -46,27 +46,59 @@ export const useCartStore = defineStore('cart', {
     },
 
   // 個別商品加入
-  async individualaddItem(product) {
-    const existing = this.items.find(p => p.id === product.id)
-    if (existing) {
-      existing.quantity += product.quantity
-    } else {
-      this.items.push({ ...product, quantity: product.quantity})
-    }
-    console.log('目前購物車：', JSON.stringify(this.items))
-    const auth = useAuthStore()
-    if (auth.user?.id) {
-      await fetch(`${API_URL}/api/cart`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: auth.user.id,
-          product_id: product.id,
-          quantity: product.quantity
-        })
+// stores/cart.js
+async individualaddItem({ id, name, price, image, addQty, stock }) {
+  if (!addQty || addQty <= 0) {
+    alert('請輸入有效數量'); return
+  }
+
+  const existing = this.items.find(p => p.id === id)
+  const currentQty = existing ? existing.quantity : 0
+  const requestedTotal = currentQty + addQty
+
+  // 先檢查庫存
+  if (typeof stock === 'number' && requestedTotal > stock) {
+    const canAdd = Math.max(stock - currentQty, 0)
+    alert(canAdd > 0
+      ? `庫存不足，最多只能再加 ${canAdd} 件（庫存共 ${stock}）`
+      : `庫存不足，已達上限（庫存共 ${stock}）`)
+    return
+  }
+
+
+
+  // 樂觀更新
+  if (existing) existing.quantity += addQty
+  else this.items.push({ id, name, price, image, quantity: requestedTotal })
+
+
+
+  // 同步後端（建議用 /api/cart/add 的「增加量」語意）
+  const auth = useAuthStore()
+  if (auth.user?.id) {
+    const res = await fetch(`${API_URL}/api/cart/add`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: auth.user.id,      // 數字
+        product_id: id,             // 字串（你的 schema）
+        add_quantity: addQty
       })
+    })
+    // 檢查回應是否成功
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      // 回滾
+      if (existing) existing.quantity -= addQty
+      else this.items = this.items.filter(p => p.id !== id)
+      if (data.error === 'INSUFFICIENT_STOCK') {
+        alert(`庫存不足，最多可再加 ${data.availableToAdd} 件（目前購物車已有 ${data.currentInCart} 件，庫存共 ${data.stock}）`)
+      } else {
+        alert(data.error || '加入購物車失敗')
+      }
     }
-  },
+  }
+},
 
 
 // 更新商品數量

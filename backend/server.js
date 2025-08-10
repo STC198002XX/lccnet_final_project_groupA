@@ -386,6 +386,72 @@ app.get('/api/cart', async (req, res) => {
   }
 })
 
+// POST /api/cart/add  —— 用「加多少」的語意
+app.post('/api/cart/add', express.json(), async (req, res) => {
+  const { user_id, product_id, add_quantity } = req.body
+  const db = req.app.locals.db
+  const products = db.collection('products')
+  const carts = db.collection('carts')
+
+  if (user_id === undefined || !product_id || typeof add_quantity !== 'number') {
+    return res.status(400).json({ error: '缺少必要欄位' })
+  }
+  if (add_quantity <= 0) {
+    return res.status(400).json({ error: 'add_quantity 必須為正數' })
+  }
+
+  try {
+    // 1) 查商品庫存
+    const prod = await products.findOne({ product_id })
+    if (!prod) return res.status(404).json({ error: '商品不存在' })
+
+    const stock = Number(prod.stock ?? 0)
+
+    // 2) 查購物車現有數量
+    const cart = await carts.findOne({ user_id: Number(user_id) })
+    const currentInCart =
+      cart?.items?.find(it => it.product_id === product_id)?.quantity ?? 0
+
+    const newTotal = currentInCart + add_quantity
+
+    // 3) 檢查是否超過庫存
+    if (newTotal > stock) {
+      const availableToAdd = Math.max(stock - currentInCart, 0)
+      return res.status(409).json({
+        error: 'INSUFFICIENT_STOCK',
+        stock,
+        currentInCart,
+        availableToAdd,
+      })
+    }
+
+    // 4) 寫回購物車（設為 newTotal）
+    if (cart) {
+      const idx = cart.items.findIndex(it => it.product_id === product_id)
+      if (idx >= 0) {
+        cart.items[idx].quantity = newTotal
+      } else {
+        cart.items.push({ product_id, quantity: newTotal })
+      }
+      await carts.updateOne(
+        { user_id: Number(user_id) },
+        { $set: { items: cart.items, updated_at: new Date() } }
+      )
+    } else {
+      await carts.insertOne({
+        user_id: Number(user_id),
+        items: [{ product_id, quantity: newTotal }],
+        updated_at: new Date(),
+      })
+    }
+
+    res.json({ message: '購物車更新成功', quantity: newTotal })
+  } catch (err) {
+    console.error('寫入購物車失敗:', err)
+    res.status(500).json({ error: '伺服器錯誤' })
+  }
+})
+
 // 建立訂單 API
 app.post('/api/orders', async (req, res) => {
   const { user_id, name, address, phone, note, items } = req.body

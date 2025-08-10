@@ -67,7 +67,7 @@
 
   onMounted(async () => {
     const id = route.params.id
-    const res = await fetch(`${API_URL}/api/products/${id}`)
+    const res = await fetch(`${API_URL}/api/products/${id}`)  // 獲取商品資料，會轉成product物件
     const data = await res.json()
     product.value = {
       id: data.product_id,
@@ -75,7 +75,7 @@
       price: data.price,
       image: data.image,
       category: data.category,
-      stock: data.stock ?? 10 // 假設後端沒傳 stock 就預設 10
+      stock: data.stock // 庫存屬性以便前端檢查
     }
   })
 
@@ -91,14 +91,15 @@ function handleAddToCart() {
   }
 
   cart.individualaddItem({
-    id: product.value.id,
+    id: product.value.id,        // product是從API獲取的商品資料
     name: product.value.name,
     price: product.value.price,
     image: product.value.image,
-    quantity: quantity.value
+    addQty: quantity.value,     // ← 改名：要加入的增量
+    stock: product.value.stock  // ← 多帶庫存，方便前端先擋
   })
-
-  alert('商品已加入購物車！')
+  // 成功就不顯示alert了
+  //alert('商品已加入購物車！') 
   showCart.value = true
 }
 </script>
