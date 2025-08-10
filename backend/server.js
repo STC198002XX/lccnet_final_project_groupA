@@ -452,93 +452,124 @@ app.post('/api/cart/add', express.json(), async (req, res) => {
   }
 })
 
-// 建立訂單 API
-app.post('/api/orders', async (req, res) => {
-  const { user_id, name, address, phone, note, items } = req.body
-  const db = req.app.locals.db
+// 建立訂單 API（含庫存檢查與扣減）
+app.post('/api/orders', async (req, res) => {                 // 定義 POST /api/orders 路由（非同步處理）
+  const { user_id, name, address, phone, note, items } = req.body // 從請求本文取出必需欄位（含購物明細 items）
+  const db = req.app.locals.db                                  // 取得已連線的資料庫實例
+  const client = req.app.locals.client                          // 取得 MongoClient 實例（用來開啟 session）
+  const session = client.startSession()                         // 開一個資料庫工作階段（用於交易）
 
   try {
-    const parsedUserId = typeof user_id === 'string' ? parseInt(user_id) : user_id
+    const parsedUserId = typeof user_id === 'string' ? parseInt(user_id) : user_id // 將字串 user_id 轉成數字，否則保留
+    await session.withTransaction(async () => {                 // 在交易中執行以下所有操作（要嘛全成功，要嘛全回滾）
+      const productIds = items.map(i => i.product_id)           // 從訂單項目取出所有 product_id（一次查詢）
 
-    // 1. 查詢所有商品價格
-    const productIds = items.map(i => i.product_id)
-    const products = await db.collection('products')
-      .find({ product_id: { $in: productIds } })
-      .toArray()
+      // 1) 查商品
 
-    const productMap = {}
-    products.forEach(p => {
-      productMap[p.product_id] = p
-    })
+      const products = await db.collection('products')          // 進入 products 集合
+        .find({ product_id: { $in: productIds } }, { session }) // 找到訂單中所有商品（在交易 session 下）
+        .toArray()                                              // 轉成陣列
+      const pmap = Object.fromEntries(products.map(p => [p.product_id, p])) // 以 product_id 建索引（查找 O(1)）
 
-    // 2. 計算總金額與建立 order_items
-    let amount = 0
-    const order_items = items.map(i => {
-      const product = productMap[i.product_id]
-      const price = product?.price || 0
-      const subtotal = price * i.quantity
-      amount += subtotal
 
-      return {
-        product_id: i.product_id,
-        name: product?.name || '未知商品',
-        price,
-        quantity: i.quantity,
-        subtotal
+
+      // 2) 檢查庫存
+
+      const shortages = []                                      // 用來收集不足或不存在的商品
+      for (const it of items) {                                 // 逐一檢查每個訂單項目
+        const p = pmap[it.product_id]                           // 找到對應商品資料
+        const stock = Number(p?.stock ?? 0)                     // 取出庫存（缺省視為 0）
+        if (!p) shortages.push({ product_id: it.product_id, reason: 'NOT_FOUND' }) // 商品不存在
+        else if (it.quantity > stock)                           // 訂購量 > 庫存 → 不足
+          shortages.push({ product_id: it.product_id, stock, requested: it.quantity })
       }
-    })
 
-    // 3. 產生 order_id
-    const lastOrder = await db.collection('orders')
-      .find()
-      .sort({ created_at: -1 })
-      .limit(1)
-      .toArray()
-
-    let orderNumber = 1
-    if (lastOrder.length > 0 && lastOrder[0].order_id) {
-      const match = lastOrder[0].order_id.match(/order(\d+)/)
-      if (match) {
-        orderNumber = parseInt(match[1]) + 1
+      if (shortages.length) {                                   // 只要有任何不足/不存在
+        const e = new Error('INSUFFICIENT_STOCK')               // 丟出自訂錯誤
+        e.code = 'INSUFFICIENT_STOCK'                           // 標記錯誤碼（給外層捕捉判斷 409）
+        e.data = { shortages }                                  // 帶上不足明細
+        throw e                                                 // 中斷交易（將觸發回滾）
       }
+
+
+
+      // 3) 先扣庫存（條件式扣減，避免競態）
+
+      const bulkOps = items.map(it => ({                        // 準備多筆更新操作
+        updateOne: {
+          filter: { product_id: it.product_id, stock: { $gte: it.quantity } }, // 僅當現庫存 ≥ 訂購量才更新
+          update: { $inc: { stock: -it.quantity } }             // 庫存遞減訂購量
+        }
+      }))
+
+      const bulkRes = await db.collection('products').bulkWrite( // 一次送出批次更新
+        bulkOps, { ordered: true, session }                      // ordered:true 順序執行；帶入 session
+      )
+
+      // 確認每個商品都有成功扣到
+      if (bulkRes.modifiedCount !== items.length) {              // 若成功修改數量不等於訂單件數 → 有商品沒扣到
+        const e = new Error('INSUFFICIENT_STOCK_AFTER_CHECK')    // 二次防呆（並發下可能被別人先扣走）
+        e.code = 'INSUFFICIENT_STOCK'
+        throw e                                                  // 丟錯讓交易回滾
+      }
+
+
+
+      // 4) 計算金額 & 產生 order_id
+
+      let amount = 0                                            // 累計總金額
+      const order_items = items.map(i => {                      // 轉換成要寫入的 order_items
+        const p = pmap[i.product_id]                            // 取商品資料
+        const price = Number(p.price || 0)                      // 價格（缺省 0）
+        const subtotal = price * i.quantity                     // 小計
+        amount += subtotal                                      // 加總
+        return { product_id: i.product_id, quantity: i.quantity, price } // 簡化後的項目
+      })
+
+
+
+      const last = await db.collection('orders')                // 取上一張訂單（為了編號遞增）
+        .find({}, { session }).sort({ created_at: -1 }).limit(1).toArray()
+
+      const lastNo = last[0]?.order_id?.match(/order(\d+)/)?.[1] // 從 order_id 取數字序號
+      const orderNumber = lastNo ? parseInt(lastNo) + 1 : 1     // 下一個流水號
+      const order_id = `order${String(orderNumber).padStart(4, '0')}` // 產生像 order0001 的格式
+
+      // 5) 寫入 orders / order_items
+      await db.collection('orders').insertOne({                 // 寫入訂單主檔
+        order_id, user_id: parsedUserId, name, address, phone, note,
+        amount, status: '處理中', created_at: new Date()
+      }, { session })
+
+
+
+      await db.collection('order_items').insertMany(            // 批次寫入訂單明細
+        order_items.map(oi => ({ order_id, ...oi })), { session }
+      )
+
+
+
+      // 6) 清空購物車
+      await db.collection('carts').updateOne(                   // 把此使用者購物車清空
+        { user_id: parsedUserId },
+        { $set: { items: [], updated_at: new Date() } },
+        { session }
+      )
+
+
+
+      res.json({ message: '訂單建立成功', order_id, amount })  // 回傳訂單建立結果（在交易內回應）
+    })
+  } catch (err) {                                               // 捕捉交易或其他錯誤
+    if (err.code === 'INSUFFICIENT_STOCK') {                    // 庫存不足類錯誤
+      return res.status(409).json({ error: 'INSUFFICIENT_STOCK', ...(err.data || {}) }) // 回 409 + 不足清單
     }
-    const order_id = `order${String(orderNumber).padStart(4, '0')}`  //原本是order_0000,改成 order0000,以符合綠界orderNo 格式
-
-    // 4. 寫入 orders
-    const order = {
-      order_id,
-      user_id: parsedUserId,
-      name,
-      address,
-      phone,
-      note,
-      amount,
-      status: '處理中',  
-      created_at: new Date()
-    }
-    await db.collection('orders').insertOne(order)
-
-    // 5. 寫入 order_items
-    const itemsToInsert = order_items.map(item => ({
-  order_id,
-  product_id: item.product_id,
-  quantity: item.quantity,
-  price: item.price
-}))
-    await db.collection('order_items').insertMany(itemsToInsert)
-
-    // 6. 清空購物車
-    await db.collection('carts').updateOne(
-      { user_id: parsedUserId },
-      { $set: { items: [], updated_at: new Date() } }
-    )
-
-    res.json({ message: '訂單建立成功', order_id,amount })
-
-  } catch (err) {
-    console.error('❌ 建立訂單失敗:', err)
+    console.error('❌ 建立訂單失敗:', err)                     // 其他錯誤 → 500
     res.status(500).json({ error: '伺服器錯誤' })
-  } 
+  } finally {
+    await session.endSession()                                  // 無論成功或失敗都結束 session
+  }
+
 })
 // 清空購物車 API
 app.post('/api/cart/clear', express.json(), async (req, res) => {

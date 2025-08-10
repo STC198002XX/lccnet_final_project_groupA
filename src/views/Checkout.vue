@@ -33,14 +33,14 @@
 
 <script setup>
 import Header from '@/components/Header.vue'   // 新增的
-import { reactive } from 'vue'
+import { reactive,ref } from 'vue'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth' // ✅ 新增
 import axios from 'axios'
 const API_URL = process.env.VUE_APP_API
 const cart = useCartStore()
 const auth = useAuthStore() // ✅ 使用登入資訊
-
+const isSubmitting = ref(false)
 const form = reactive({
   name: '',
   address: '',
@@ -49,50 +49,62 @@ const form = reactive({
 })
 
 async function submitOrder() {
+  if (!auth.user?.id) {
+    alert('❌ 尚未登入，請先登入')
+    return
+  }
+  if (cart.items.length === 0) {
+    alert('購物車是空的')
+    return
+  }
+
+  const payload = {
+    user_id: auth.user.id,
+    ...form, // 你的表單：name, address, phone, note...
+    items: cart.items.map(it => ({ product_id: it.id, quantity: it.quantity }))
+  }
+
   try {
-    if (!auth.user?.id) {
-      alert('❌ 尚未登入，請先登入')
-      return
-    }
+    isSubmitting.value = true
 
-    // 1. 建立訂單資料
-    const payload = {
-      user_id: auth.user.id, // ✅ 加入使用者 ID
-      ...form,
-      items: cart.items.map(item => ({
-        product_id: item.id,
-        quantity: item.quantity
-      }))
-    }
-
-    const orderRes = await axios.post(`${API_URL}/api/orders`, payload)
-    const order = orderRes.data
+    // 1) 建立訂單（後端同時檢查與扣庫存、清購物車）
+    const { data: order } = await axios.post(`${API_URL}/api/orders`, payload)
     console.log('訂單資料:', order)
-    // 2. 根據訂單內容建立綠界付款表單
-    const ecpayRes = await axios.post(`${API_URL}/api/ecpay-pay`, {
-      amount: order.amount, // 測試金額
+
+    // 2) 綠界表單
+    const { data: payFormHtml } = await axios.post(`${API_URL}/api/ecpay-pay`, {
+      amount: order.amount,
       desc: '訂單說明',
       itemName: '購物商品項目',
       orderNo: order.order_id
     })
-    
-    // 3. 清空購物車
-    cart.clearCart()
 
-    // 4. 建立一個 <div> 塞進表單並觸發送出
+    // 3) 重置本地購物車（後端已清，這裡只同步前端狀態）
+    cart.items = []
+    await cart.clearCart()
+
+    // 4) 注入並送出綠界表單
     const formDiv = document.createElement('div')
-    formDiv.innerHTML = ecpayRes.data
+    formDiv.innerHTML = payFormHtml
     document.body.appendChild(formDiv)
-    formDiv.querySelector('form').submit()
-  } catch (err) {
-    alert('❌ 訂單送出失敗')
-    console.error(err)
+    formDiv.querySelector('form')?.submit()
 
-  //   alert('✅ 訂單已送出！')
-  //   cart.clearCart()
-  // } catch (err) {
-  //   alert('❌ 訂單送出失敗，請稍後再試')
-  //   console.error(err)
-  // }
-}}
+  } catch (err) {
+    // 後端回 409：庫存不足（附 shortages 明細）
+    if (axios.isAxiosError(err) && err.response?.status === 409) {
+      const shortages = err.response.data?.shortages || []
+      const lines = shortages.map(s => {
+        if (s.reason === 'NOT_FOUND') return `商品 ${s.product_id} 不存在`
+        return `商品 ${s.product_id} 庫存 ${s.stock}，需求 ${s.requested}`
+      })
+      alert(`❌ 庫存不足，請調整數量：\n${lines.join('\n')}`)
+      return
+    }
+
+    console.error(err)
+    alert('❌ 訂單送出失敗，請稍後再試')
+  } finally {
+    isSubmitting.value = false
+  }
+}
 </script>
