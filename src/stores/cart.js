@@ -24,12 +24,26 @@ export const useCartStore = defineStore('cart', {
     // 加入商品
     async addItem(product) {
       const existing = this.items.find(p => p.id === product.id)
-      if (existing) {
-        existing.quantity += 1
-      } else {
-        this.items.push({ ...product, quantity: 1 })
-      }
-      console.log('目前購物車：', JSON.stringify(this.items))
+      const newQty = existing ? existing.quantity + 1 : 1
+  // 1️⃣ 先查庫存
+  const res = await fetch(`${API_URL}/api/products/${product.id}`)
+  const data = await res.json()
+  if (!res.ok || !data) {
+    alert('查詢庫存失敗')
+    return
+  }
+  if (newQty > data.stock) {
+    alert(`庫存不足，最多可購買 ${data.stock} 件`)
+    return
+  }
+  // 2️⃣ 庫存足夠 → 更新購物車
+  if (existing) {
+    existing.quantity = newQty
+  } else {
+    this.items.push({ ...product, quantity: newQty })
+  }
+  console.log('目前購物車：', JSON.stringify(this.items))
+  // 3️⃣ 同步後端
 
       const auth = useAuthStore()
       if (auth.user?.id) {
@@ -39,7 +53,7 @@ export const useCartStore = defineStore('cart', {
           body: JSON.stringify({
             user_id: auth.user.id,
             product_id: product.id,
-            quantity: 1
+            quantity: newQty // ✅ 設為加完後的數量
           })
         })
       }

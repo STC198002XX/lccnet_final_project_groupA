@@ -53,10 +53,9 @@ import { useCartStore } from '@/stores/cart'
 const cart = useCartStore()
 
 function increase(id) {
-  const item = cart.items.find(p => p.id === id)
-  if (item) {
-    const newQty = item.quantity + 1
-    cart.updateQuantity(id, newQty)  // ✅ 會同步到後端
+   const product = cart.items.find(p => p.id === id)
+  if (product) {
+    cart.addItem(product)
   }
 }
 
