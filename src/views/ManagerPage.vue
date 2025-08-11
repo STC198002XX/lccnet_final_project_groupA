@@ -52,8 +52,8 @@ const router = useRouter()
 const currentTab = ref('memberOrders')
 
 const tabs = [
-  { id: 'memberOrders', label: '會員與訂單管理' },
-  { id: 'products', label: '商品庫存查詢' },
+  { id: 'memberOrders', label: '會員與訂單' },
+  { id: 'products', label: '商品庫存' },
   { id: 'addProduct', label: '商品上架' } // ✅ 元件加回去
   // { id: 'admins', label: '新增管理員' }    // ❌ 註解
 ]
