@@ -470,6 +470,16 @@ app.post('/api/orders', async (req, res) => {
     products.forEach(p => {
       productMap[p.product_id] = p
     })
+    //1.1新增數量不足查詢
+
+        const lack = items.filter(i => {
+      const p = productMap[i.product_id]
+      const stock = Number(p?.stock ?? 0)
+      return i.quantity > stock
+    })
+    if (lack.length > 0) {
+      return res.status(400).json({ error: '庫存不足' })
+    }
 
     // 2. 計算總金額與建立 order_items
     let amount = 0

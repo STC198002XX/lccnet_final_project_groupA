@@ -71,8 +71,8 @@ async function submitOrder() {
     // 2. 根據訂單內容建立綠界付款表單
     const ecpayRes = await axios.post(`${API_URL}/api/ecpay-pay`, {
       amount: order.amount, // 測試金額
-      desc: '訂單說明',
-      itemName: '購物商品項目',
+      desc: '訂單說明123',
+      itemName: '購物商品項目456',
       orderNo: order.order_id
     })
     
@@ -85,6 +85,10 @@ async function submitOrder() {
     document.body.appendChild(formDiv)
     formDiv.querySelector('form').submit()
   } catch (err) {
+     if (err?.response?.status === 400 && err?.response?.data?.error === '庫存不足') {
+      alert('❌ 庫存不足，請調整數量後再嘗試')
+      return
+    }
     alert('❌ 訂單送出失敗')
     console.error(err)
 
