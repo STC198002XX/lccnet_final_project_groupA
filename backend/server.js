@@ -478,7 +478,45 @@ app.post('/api/orders', async (req, res) => {
       return i.quantity > stock
     })
     if (lack.length > 0) {
-      return res.status(400).json({ error: '庫存不足' })
+      const details = lack.map(i => ({
+      product_id: i.product_id,
+      requested: i.quantity,
+      stock: Number(productMap[i.product_id]?.stock ?? 0)
+      }))
+      return res.status(400).json({ error: '庫存不足', details })
+    }
+        // 扣庫存（逐品項原子條件：僅在目前庫存 >= 訂購量時扣減）
+    const decOps = items.map(i => ({
+      updateOne: {
+        filter: { product_id: i.product_id, stock: { $gte: i.quantity } },
+        update: { $inc: { stock: -i.quantity } }
+      }
+    }))
+    const decResult = await db.collection('products').bulkWrite(decOps, { ordered: false })
+
+    // 若有任一品項未成功扣減（可能被他人先購買），補回已扣數量並回報庫存不足
+    if (decResult.modifiedCount !== items.length) {
+      const incOps = items.map(i => ({
+        updateOne: {
+          filter: { product_id: i.product_id },
+          update: { $inc: { stock: i.quantity } }
+        }
+      }))
+      await db.collection('products').bulkWrite(incOps, { ordered: false })
+      // INSERT BELOW
+    const latestProducts = await db.collection('products')
+      .find({ product_id: { $in: productIds } })
+      .toArray()
+    const latestMap = {}
+    latestProducts.forEach(p => { latestMap[p.product_id] = p })
+    const details = items
+      .filter(i => i.quantity > Number(latestMap[i.product_id]?.stock ?? 0))
+      .map(i => ({
+        product_id: i.product_id,
+        requested: i.quantity,
+        stock: Number(latestMap[i.product_id]?.stock ?? 0)
+      }))
+      return res.status(400).json({ error: '庫存不足',details })
     }
 
     // 2. 計算總金額與建立 order_items
