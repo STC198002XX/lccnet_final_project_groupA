@@ -702,7 +702,7 @@ app.post('/api/ecpay-pay', async (req, res) => {
     TradeDesc: '聯成專案1140813測試交易',
     ItemName: '聯成專案1140813測試商品',
     ReturnURL: `${HOST}/return`,
-    ClientBackURL: `${HOST}/clientReturn`,
+   ClientBackURL: `${HOST}/clientReturn`,
   };
   const create = new ecpay_payment(options);
 
@@ -770,11 +770,85 @@ app.post('/return', async (req, res) => {
 });
 
 //用戶交易完成後的轉址，付款成功頁面
-app.get('/clientReturn', (req, res) => {
-  res.send('<h1>✅ 付款完成，謝謝您的訂購！</h1>')
+app.get('/clientReturn', async (req, res) => {   //TODO: 目前的作法是抓最近一筆付款的訂單以顯示付款資訊,多人時會有問題
+  const db = req.app.locals.db
+  const { orderNo } = req.query
+  console.log("下面是req.query.orderNo")
+  console.log(orderNo)
+  console.log("下面是req")
+  console.log(req)
+
+  try {
+    // 1) 取得目標訂單
+    let order = null
+    if (orderNo) {
+      order = await db.collection('orders').findOne({ order_id: orderNo })
+    } else {
+      // 沒帶 orderNo：抓最近一筆已付款的訂單（開發/單人測試狀況下可用）
+      order = await db.collection('orders')
+        .find({ status: '已付款' })
+        .sort({ paid_at: -1 })  // 以付款時間倒序
+        .limit(1)
+        .next()
+    }
+
+    if (!order) {
+      return res.send(`
+        <script>
+          alert("✅ 付款完成，但找不到訂單資料（可能尚未回寫或參數缺失）。");
+          window.location.href = "https://frontend1140813groupa-42a3fe6acaab.herokuapp.com/";
+        </script>
+      `)
+    }
+
+    const orderId = order.order_id
+    const amount = order.amount
+
+    // 2) 查訂單明細
+    const orderItems = await db.collection('order_items')
+      .find({ order_id: orderId })
+      .toArray()
+
+    // 3) 以 product_id 取商品名稱
+    const productIds = orderItems.map(i => i.product_id)
+    const products = await db.collection('products')
+      .find({ product_id: { $in: productIds } })
+      .toArray()
+    const nameMap = {}
+    products.forEach(p => { nameMap[p.product_id] = p.name })
+
+    // 4) 組購物內容（含單價 × 數量 = 小計）
+    const lines = orderItems.map(i => {
+      const name = nameMap[i.product_id] || i.product_id
+      const unit = (typeof i.price === 'number') ? i.price : 0
+      const sub = unit * i.quantity
+      return `${name} x ${i.quantity}（單價${unit}，小計${sub}）`
+    }).join('\\n')
+
+    const msg = [
+      '✅ 付款完成！',
+      `訂單編號：${orderId}`,
+      `金額：${amount}`,
+      '購物內容：',
+      lines
+    ].join('\\n')
+
+    res.send(`
+      <script>
+        alert("${msg}");
+        window.location.href = "https://frontend1140813groupa-42a3fe6acaab.herokuapp.com/";
+      </script>
+    `)
+  } catch (err) {
+    console.error('❌ /clientReturn 錯誤：', err)
+    res.send(`
+      <script>
+        alert("付款完成，但顯示訂單資訊時發生錯誤。");
+        window.location.href = "https://frontend1140813groupa-42a3fe6acaab.herokuapp.com/";
+      </script>
+    `)
+  }
 })
 
 
-// app.listen(port, () => {
-//   console.log(`✅ API Server running on http://localhost:${port}`)
-// })
+
